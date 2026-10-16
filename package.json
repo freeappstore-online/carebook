@@ -1,0 +1,15 @@
+{
+  "name": "carebook",
+  "private": true,
+  "packageManager": "pnpm@10.30.3",
+  "engines": { "node": ">=22" },
+  "pnpm": { "onlyBuiltDependencies": ["esbuild"] },
+  "repository": { "type": "git", "url": "git+https://github.com/freeappstore-online/carebook.git" },
+  "scripts": {
+    "dev": "pnpm --filter @carebook/web dev",
+    "build": "pnpm --filter @carebook/web build",
+    "preview": "pnpm --filter @carebook/web preview",
+    "typecheck": "pnpm --filter @carebook/web exec tsc -b",
+    "test": "pnpm --filter @carebook/web exec tsc -b"
+  }
+}
