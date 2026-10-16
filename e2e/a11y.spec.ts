@@ -13,6 +13,9 @@ const WCAG = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
 const PLATFORM_HEADER = 'body > div#root header'
 
 async function audit(page: Page, label: string) {
+  // Let entry animations (e.g. a dialog fading in) finish, or axe measures
+  // contrast mid-fade.
+  await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running'))
   const results = await new AxeBuilder({ page }).withTags(WCAG).exclude(PLATFORM_HEADER).analyze()
   const summary = results.violations.map(
     (v) => `${v.id} (${v.impact}): ${v.help}\n  ${v.nodes.map((n) => n.target.join(' ')).join('\n  ')}`,
