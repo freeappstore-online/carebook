@@ -196,7 +196,7 @@ describe('dose logs', () => {
 })
 
 describe('schema upgrade', () => {
-  it('upgrades a v1 database to v2 and keeps its medications', async () => {
+  it('upgrades a v1 database to the current version and keeps its medications', async () => {
     const name = `test-${++dbCount}`
     const v1 = await openDB(name, 1, {
       upgrade(db) {
@@ -215,7 +215,63 @@ describe('schema upgrade', () => {
     await repo.close()
 
     const raw = await openDB(name, SCHEMA_VERSION)
-    expect(await raw.get('meta', 'schemaVersion')).toBe(2)
+    expect(await raw.get('meta', 'schemaVersion')).toBe(SCHEMA_VERSION)
     raw.close()
+  })
+})
+
+describe('vitals readings', () => {
+  it('saves a reading at its wall time in the given zone, updates and deletes it', async () => {
+    let clock = 5000
+    const repo = makeRepo({ now: () => clock })
+    const saved = await repo.saveReading(
+      { date: '2026-03-08', time: '02:30', systolic: 128, diastolic: 82, pulse: 64, arm: 'left' },
+      'America/New_York',
+    )
+    expect(saved).toEqual({
+      id: 'id-1',
+      date: '2026-03-08',
+      time: '02:30',
+      // 02:30 doesn't exist that night in New York; it's read as 03:30 EDT.
+      takenAt: Date.parse('2026-03-08T07:30:00Z'),
+      systolic: 128,
+      diastolic: 82,
+      pulse: 64,
+      arm: 'left',
+      notes: '',
+      createdAt: 5000,
+      updatedAt: 5000,
+    })
+
+    clock = 6000
+    const updated = await repo.saveReading({ ...saved, pulse: undefined, weight: { value: 70, unit: 'kg' } }, 'America/New_York')
+    expect(updated).toMatchObject({ id: 'id-1', createdAt: 5000, updatedAt: 6000, weight: { value: 70, unit: 'kg' } })
+    expect(updated).not.toHaveProperty('pulse')
+
+    await repo.removeReading('id-1')
+    expect(await repo.listReadings({ from: '2026-03-01', to: '2026-03-31' })).toEqual([])
+    await expect(repo.saveReading({ ...saved }, 'UTC')).rejects.toThrow(/no longer exists/)
+  })
+
+  it('lists readings in a date range by time and finds the latest', async () => {
+    const repo = makeRepo()
+    expect(await repo.latestReading()).toBeUndefined()
+    for (const [date, time] of [
+      ['2026-10-16', '20:00'],
+      ['2026-10-14', '08:00'],
+      ['2026-10-16', '07:00'],
+      ['2026-10-01', '08:00'],
+    ]) {
+      await repo.saveReading({ date, time, pulse: 60 }, 'UTC')
+    }
+    const list = await repo.listReadings({ from: '2026-10-10', to: '2026-10-16' })
+    expect(list.map((r) => `${r.date} ${r.time}`)).toEqual(['2026-10-14 08:00', '2026-10-16 07:00', '2026-10-16 20:00'])
+    expect((await repo.latestReading())?.time).toBe('20:00')
+  })
+
+  it('rejects invalid readings without writing', async () => {
+    const repo = makeRepo()
+    await expect(repo.saveReading({ date: '2026-10-16', time: '08:00' }, 'UTC')).rejects.toThrow(/at least one/)
+    expect(await repo.latestReading()).toBeUndefined()
   })
 })

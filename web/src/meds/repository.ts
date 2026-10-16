@@ -1,21 +1,25 @@
-// On-device storage for medications and dose logs (IndexedDB). Nothing here
+// On-device storage for medications, dose logs and vitals (IndexedDB). Nothing here
 // leaves the device.
 
 import { type DBSchema, type IDBPDatabase, openDB } from 'idb'
 import { type DoseLog, type DoseStatus, SNOOZE_MINUTES, asNeededKey } from '../today/types'
+import type { Reading, ReadingInput } from '../vitals/types'
+import { ReadingError, normalizeReadingInput } from '../vitals/validate'
 import type { ScheduledDose } from './schedule'
 import type { Medication, MedicationInput } from './types'
-import { type LocalDate, dateAt, timeAt } from './zoned'
+import { type LocalDate, dateAt, timeAt, zonedToEpoch } from './zoned'
 import { MedicationError, normalizeMedicationInput } from './validate'
 
 export const DB_NAME = 'carebook'
 /** The IndexedDB version is the schema version; later tickets add stores here. */
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 
 export interface CarebookDB extends DBSchema {
   medications: { key: string; value: Medication; indexes: { name: string } }
   /** Since v2: one record per logged dose, keyed by dose key. */
   adherence: { key: string; value: DoseLog; indexes: { date: string; medicationId: string } }
+  /** Since v3: vitals readings. */
+  vitals: { key: string; value: Reading; indexes: { date: string } }
   /** schemaVersion and similar bookkeeping. */
   meta: { key: string; value: unknown }
 }
@@ -32,6 +36,10 @@ export function openCarebookDB(name = DB_NAME, onBlocking?: () => void): Promise
         const store = db.createObjectStore('adherence', { keyPath: 'key' })
         store.createIndex('date', 'date')
         store.createIndex('medicationId', 'medicationId')
+      }
+      // v3: vitals readings.
+      if (!db.objectStoreNames.contains('vitals')) {
+        db.createObjectStore('vitals', { keyPath: 'id' }).createIndex('date', 'date')
       }
       tx.objectStore('meta').put(newVersion ?? SCHEMA_VERSION, 'schemaVersion').catch(() => {})
     },
@@ -55,6 +63,13 @@ export interface MedicationRepository {
   logAsNeeded(medicationId: string, timeZone: string): Promise<DoseLog>
   /** Removes a log (undo). */
   clearLog(key: string): Promise<void>
+  /** Vitals readings for an inclusive range of days, oldest first. */
+  listReadings(range: { from: LocalDate; to: LocalDate }): Promise<Reading[]>
+  /** The most recent reading, if any (for remembering units). */
+  latestReading(): Promise<Reading | undefined>
+  /** Creates a reading, or updates it when `input.id` exists. Wall times are read in `timeZone`. */
+  saveReading(input: ReadingInput, timeZone: string): Promise<Reading>
+  removeReading(id: string): Promise<void>
   close(): Promise<void>
 }
 
@@ -155,6 +170,43 @@ export function createMedicationRepository({
     },
     async clearLog(key) {
       await (await open()).delete('adherence', key)
+    },
+    async listReadings({ from, to }) {
+      if (to < from) return []
+      const readings = await (await open()).getAllFromIndex('vitals', 'date', IDBKeyRange.bound(from, to))
+      return readings.sort((a, b) => a.takenAt - b.takenAt)
+    },
+    async latestReading() {
+      const cursor = await (await open()).transaction('vitals').store.index('date').openCursor(null, 'prev')
+      if (!cursor) return undefined
+      // Several readings can share the latest date; take the latest time.
+      const sameDay = await (await open()).getAllFromIndex('vitals', 'date', cursor.value.date)
+      return sameDay.sort((a, b) => b.takenAt - a.takenAt)[0]
+    },
+    async saveReading(input, timeZone) {
+      const fields = normalizeReadingInput(input)
+      const conn = await open()
+      const tx = conn.transaction('vitals', 'readwrite')
+      const existing = input.id ? await tx.store.get(input.id) : undefined
+      if (input.id && !existing) {
+        tx.abort()
+        await tx.done.catch(() => {})
+        throw new ReadingError('id', 'That reading no longer exists')
+      }
+      const time = now()
+      const reading: Reading = {
+        ...fields,
+        id: existing?.id ?? newId(),
+        takenAt: zonedToEpoch(fields.date, fields.time, timeZone),
+        createdAt: existing?.createdAt ?? time,
+        updatedAt: time,
+      }
+      await tx.store.put(reading)
+      await tx.done
+      return reading
+    },
+    async removeReading(id) {
+      await (await open()).delete('vitals', id)
     },
     async close() {
       if (!db) return
