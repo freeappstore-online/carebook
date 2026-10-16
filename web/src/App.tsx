@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { initApp } from '@freeappstore/sdk'
 import { BuildInfo, type NavItem, PageHeader, Shell } from '@freeappstore/sdk/ui'
+import { MedicationsScreen } from './meds/MedicationsScreen'
 
 const fas = initApp({ appId: 'carebook' })
 
@@ -9,6 +10,7 @@ const fas = initApp({ appId: 'carebook' })
 // tab title on that route.
 const NAV: NavItem[] = [
   { label: 'Today', href: '/', title: 'Carebook' },
+  { label: 'Medications', href: '/medications', title: 'Medications — Carebook' },
   { label: 'About', href: '/about', title: 'About — Carebook' },
 ]
 
@@ -42,10 +44,16 @@ export default function App() {
 
   return (
     <Shell app={fas} appName="Carebook" nav={NAV} onNavigate={navigate}>
-      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">{path === '/about' ? <About /> : <Today />}</div>
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">{screen(path)}</div>
       <BuildInfo />
     </Shell>
   )
+}
+
+function screen(path: string) {
+  if (path === '/about') return <About />
+  if (path === '/medications') return <MedicationsScreen />
+  return <Today />
 }
 
 function Today() {
@@ -93,7 +101,7 @@ function About() {
 function ComingSoon() {
   return (
     <p className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4 text-[var(--muted)]">
-      Coming soon. Carebook is in development; the features below aren't available yet.
+      Coming soon. Carebook is in development: your medication list works now; the other features below aren't available yet.
     </p>
   )
 }

@@ -20,6 +20,6 @@
     "build": "pnpm --filter @carebook/web build",
     "preview": "pnpm --filter @carebook/web preview",
     "typecheck": "pnpm --filter @carebook/web exec tsc -b",
-    "test": "pnpm --filter @carebook/web exec tsc -b"
+    "test": "pnpm typecheck && pnpm --filter @carebook/web test"
   }
 }
