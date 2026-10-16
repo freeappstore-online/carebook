@@ -1,6 +1,9 @@
 import 'fake-indexeddb/auto'
 import { afterEach, describe, expect, it } from 'vitest'
-import { type MedicationRepository, type RepositoryOptions, createMedicationRepository } from './repository'
+import { openDB } from 'idb'
+import { asNeededKey, SNOOZE_MINUTES } from '../today/types'
+import { type MedicationRepository, type RepositoryOptions, SCHEMA_VERSION, createMedicationRepository } from './repository'
+import { doseKey } from './schedule'
 import type { MedicationInput } from './types'
 import { normalizeMedicationInput } from './validate'
 
@@ -115,5 +118,104 @@ describe('normalizeMedicationInput', () => {
         expect.objectContaining({ field }),
       )
     }
+  })
+})
+
+const dose = (medicationId: string, date: string, time: string) => ({
+  key: doseKey(medicationId, date, time),
+  medicationId,
+  date,
+  time,
+})
+
+describe('dose logs', () => {
+  it('sets, replaces and clears a dose status', async () => {
+    let clock = Date.parse('2026-10-16T08:05:00Z')
+    const repo = makeRepo({ now: () => clock })
+    const med = await repo.save(input())
+    const d = dose(med.id, '2026-10-16', '08:00')
+
+    expect(await repo.setStatus(d, 'snoozed')).toEqual({
+      ...d,
+      status: 'snoozed',
+      loggedAt: clock,
+      snoozedUntil: clock + SNOOZE_MINUTES * 60_000,
+    })
+    clock += 20 * 60_000
+    await repo.setStatus(d, 'taken')
+    expect(await repo.listLogs({ from: '2026-10-16', to: '2026-10-16' })).toEqual([
+      { ...d, status: 'taken', loggedAt: clock },
+    ])
+
+    await repo.clearLog(d.key)
+    expect(await repo.listLogs({ from: '2026-10-16', to: '2026-10-16' })).toEqual([])
+  })
+
+  it('lists logs for an inclusive date range in order', async () => {
+    const repo = makeRepo()
+    for (const [date, time] of [
+      ['2026-10-17', '08:00'],
+      ['2026-10-15', '20:00'],
+      ['2026-10-16', '08:00'],
+      ['2026-10-15', '08:00'],
+      ['2026-10-14', '08:00'],
+    ]) {
+      await repo.setStatus(dose('m', date, time), 'taken')
+    }
+    const logs = await repo.listLogs({ from: '2026-10-15', to: '2026-10-16' })
+    expect(logs.map((l) => `${l.date} ${l.time}`)).toEqual(['2026-10-15 08:00', '2026-10-15 20:00', '2026-10-16 08:00'])
+    expect(await repo.listLogs({ from: '2026-10-16', to: '2026-10-15' })).toEqual([])
+  })
+
+  it('logs as-needed doses on the calendar day of the given zone', async () => {
+    // 01:30 UTC on 17 October is still 16 October in New York.
+    const clock = Date.parse('2026-10-17T01:30:00Z')
+    const repo = makeRepo({ now: () => clock })
+    const log = await repo.logAsNeeded('p', 'America/New_York')
+    expect(log).toEqual({
+      key: asNeededKey('p', '2026-10-16', clock),
+      medicationId: 'p',
+      date: '2026-10-16',
+      time: '21:30',
+      status: 'taken',
+      asNeeded: true,
+      loggedAt: clock,
+    })
+  })
+
+  it('removes a medication’s logs with it, and only its logs', async () => {
+    const repo = makeRepo()
+    const a = await repo.save(input({ name: 'A' }))
+    const b = await repo.save(input({ name: 'B' }))
+    await repo.setStatus(dose(a.id, '2026-10-16', '08:00'), 'taken')
+    await repo.setStatus(dose(b.id, '2026-10-16', '08:00'), 'taken')
+    await repo.remove(a.id)
+    const logs = await repo.listLogs({ from: '2026-10-01', to: '2026-10-31' })
+    expect(logs.map((l) => l.medicationId)).toEqual([b.id])
+  })
+})
+
+describe('schema upgrade', () => {
+  it('upgrades a v1 database to v2 and keeps its medications', async () => {
+    const name = `test-${++dbCount}`
+    const v1 = await openDB(name, 1, {
+      upgrade(db) {
+        db.createObjectStore('medications', { keyPath: 'id' }).createIndex('name', 'name')
+        db.createObjectStore('meta').put(1, 'schemaVersion')
+      },
+    })
+    const old = { ...input(), id: 'old', createdAt: 1, updatedAt: 1 }
+    await v1.put('medications', old)
+    v1.close()
+
+    const repo = makeRepo({ dbName: name })
+    expect(await repo.list()).toEqual([old])
+    await repo.setStatus(dose('old', '2026-10-16', '08:00'), 'taken')
+    expect(await repo.listLogs({ from: '2026-10-16', to: '2026-10-16' })).toHaveLength(1)
+    await repo.close()
+
+    const raw = await openDB(name, SCHEMA_VERSION)
+    expect(await raw.get('meta', 'schemaVersion')).toBe(2)
+    raw.close()
   })
 })

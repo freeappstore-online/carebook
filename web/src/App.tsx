@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { initApp } from '@freeappstore/sdk'
 import { BuildInfo, type NavItem, PageHeader, Shell } from '@freeappstore/sdk/ui'
 import { MedicationsScreen } from './meds/MedicationsScreen'
+import { HistoryScreen } from './today/HistoryScreen'
+import { TodayScreen } from './today/TodayScreen'
 
 const fas = initApp({ appId: 'carebook' })
 
@@ -11,14 +13,15 @@ const fas = initApp({ appId: 'carebook' })
 const NAV: NavItem[] = [
   { label: 'Today', href: '/', title: 'Carebook' },
   { label: 'Medications', href: '/medications', title: 'Medications — Carebook' },
+  { label: 'History', href: '/history', title: 'History — Carebook' },
   { label: 'About', href: '/about', title: 'About — Carebook' },
 ]
 
 // The features planned for v1 (freeappstore-online/platform#256). Log-and-share
 // copy only: no medical advice, diagnosis or dosing suggestions.
 const FEATURES = [
-  { name: 'Medications', what: 'Keep your list: name, strength, form, schedule and notes.' },
-  { name: 'Today', what: 'Mark each dose taken, skipped or snoozed, with a history calendar.' },
+  { name: 'Medications', what: 'Keep your list: name, strength, form, schedule and notes.', ready: true },
+  { name: 'Today', what: 'Mark each dose taken, skipped or snoozed, with a history calendar.', ready: true },
   { name: 'Blood pressure', what: 'Log readings with pulse, arm and position, plus weight and glucose.' },
   { name: 'Trends', what: 'Charts and averages over 7, 30 and 90 days.' },
   { name: 'PDF report', what: 'Make a PDF of your log for a date range to share with your clinician.' },
@@ -44,36 +47,17 @@ export default function App() {
 
   return (
     <Shell app={fas} appName="Carebook" nav={NAV} onNavigate={navigate}>
-      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">{screen(path)}</div>
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">{screen(path, navigate)}</div>
       <BuildInfo />
     </Shell>
   )
 }
 
-function screen(path: string) {
+function screen(path: string, navigate: (href: string) => void) {
   if (path === '/about') return <About />
   if (path === '/medications') return <MedicationsScreen />
-  return <Today />
-}
-
-function Today() {
-  return (
-    <>
-      <PageHeader
-        title="Carebook"
-        description="Coming soon — a private medication and blood-pressure diary: log doses and vitals, see trends, and share a PDF with your clinician. Everything stays on your device."
-      />
-      <ComingSoon />
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-        {FEATURES.map((feature) => (
-          <li key={feature.name} className="rounded-[var(--radius)] border border-[var(--line)] p-4">
-            <p className="font-semibold text-[var(--ink)]">{feature.name}</p>
-            <p className="text-sm text-[var(--muted)]">{feature.what}</p>
-          </li>
-        ))}
-      </ul>
-    </>
-  )
+  if (path === '/history') return <HistoryScreen />
+  return <TodayScreen onNavigate={navigate} />
 }
 
 function About() {
@@ -81,6 +65,17 @@ function About() {
     <>
       <PageHeader title="About" />
       <ComingSoon />
+      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+        {FEATURES.map((feature) => (
+          <li key={feature.name} className="rounded-[var(--radius)] border border-[var(--line)] p-4">
+            <p className="font-semibold text-[var(--ink)]">
+              {feature.name}
+              {!('ready' in feature) && <span className="font-normal text-[var(--muted)]"> · coming soon</span>}
+            </p>
+            <p className="text-sm text-[var(--muted)]">{feature.what}</p>
+          </li>
+        ))}
+      </ul>
       <p className="mt-4 text-[var(--muted)]">
         Carebook will be a simple diary for your medications and blood pressure: log and share with
         your clinician. It records what you enter; it doesn't give medical advice. Everything stays
@@ -97,11 +92,11 @@ function About() {
   )
 }
 
-// Placeholder until the features are built. None of them work yet, so it says so plainly.
+// Says plainly which features work yet.
 function ComingSoon() {
   return (
     <p className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4 text-[var(--muted)]">
-      Coming soon. Carebook is in development: your medication list works now; the other features below aren't available yet.
+      Carebook is in development: medications, today's doses and the history calendar work now; the features marked "coming soon" aren't available yet.
     </p>
   )
 }

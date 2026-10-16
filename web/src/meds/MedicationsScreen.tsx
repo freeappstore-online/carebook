@@ -110,7 +110,7 @@ export function MedicationsScreen({ now = Date.now, timeZone = deviceTimeZone }:
       <ConfirmDialog
         open={removing !== null}
         title="Remove medication?"
-        message={`Remove ${removing?.name ?? 'this medication'} from your list on this device?`}
+        message={`Remove ${removing?.name ?? 'this medication'} and its logged doses from this device? To keep its history, set an end date instead.`}
         confirmLabel="Remove"
         variant="danger"
         onConfirm={() => void remove()}
