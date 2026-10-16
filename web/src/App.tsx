@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 import { initApp } from '@freeappstore/sdk'
 import { BuildInfo, type NavItem, PageHeader, Shell } from '@freeappstore/sdk/ui'
 import { MedicationsScreen } from './meds/MedicationsScreen'
+import { medicationRepo } from './meds/repository'
+import { LockScreen } from './privacy/LockScreen'
+import { clearPin, hasPin } from './privacy/pin'
+import { PrivacyScreen } from './privacy/PrivacyScreen'
 import { ReportScreen } from './report/ReportScreen'
 import { BP_CATEGORIES, BP_CATEGORY_LABELS, BP_CATEGORY_RANGES, BP_SOURCE } from './vitals/bp'
 import { VitalsScreen } from './vitals/VitalsScreen'
@@ -19,6 +23,7 @@ const NAV: NavItem[] = [
   { label: 'History', href: '/history', title: 'History — Carebook' },
   { label: 'Vitals', href: '/vitals', title: 'Vitals — Carebook' },
   { label: 'Report', href: '/report', title: 'Report — Carebook' },
+  { label: 'Privacy', href: '/privacy', title: 'Privacy and data — Carebook' },
   { label: 'About', href: '/about', title: 'About — Carebook' },
 ]
 
@@ -30,11 +35,26 @@ const FEATURES = [
   { name: 'Blood pressure', what: 'Log readings with pulse, arm and position, plus weight and glucose.', ready: true },
   { name: 'Trends', what: 'Charts and averages over 7, 30 and 90 days.', ready: true },
   { name: 'PDF report', what: 'Make a PDF of your log for a date range to share with your clinician.', ready: true },
-  { name: 'Private', what: 'Everything stays on your device. No account; optional PIN lock.' },
+  { name: 'Private', what: 'Everything stays on your device. No account; optional PIN lock and JSON backups.', ready: true },
 ]
+
+/** With a PIN set, the app locks again after this long in the background. */
+const RELOCK_AFTER_MS = 5 * 60_000
 
 export default function App() {
   const [path, setPath] = useState(() => window.location.pathname)
+  // With a PIN set, nothing but the lock screen renders until it's entered.
+  const [locked, setLocked] = useState(() => hasPin())
+
+  useEffect(() => {
+    let hiddenAt = 0
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') hiddenAt = Date.now()
+      else if (hiddenAt && Date.now() - hiddenAt >= RELOCK_AFTER_MS && hasPin()) setLocked(true)
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => document.removeEventListener('visibilitychange', onVisibility)
+  }, [])
 
   // Keep the screen in step with the browser's back and forward buttons.
   useEffect(() => {
@@ -50,16 +70,30 @@ export default function App() {
     setPath(href)
   }
 
+  if (locked) {
+    return (
+      <LockScreen
+        onUnlock={() => setLocked(false)}
+        onErase={async () => {
+          await medicationRepo.eraseAll()
+          clearPin()
+          setLocked(false)
+        }}
+      />
+    )
+  }
+
   return (
     <Shell app={fas} appName="Carebook" nav={NAV} onNavigate={navigate}>
-      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">{screen(path, navigate)}</div>
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">{screen(path, navigate, () => setLocked(true))}</div>
       <BuildInfo />
     </Shell>
   )
 }
 
-function screen(path: string, navigate: (href: string) => void) {
+function screen(path: string, navigate: (href: string) => void, lock: () => void) {
   if (path === '/about') return <About />
+  if (path === '/privacy') return <PrivacyScreen onLock={lock} />
   if (path === '/medications') return <MedicationsScreen />
   if (path === '/history') return <HistoryScreen />
   if (path === '/vitals') return <VitalsScreen />
@@ -84,9 +118,10 @@ function About() {
         ))}
       </ul>
       <p className="mt-4 text-[var(--muted)]">
-        Carebook will be a simple diary for your medications and blood pressure: log and share with
+        Carebook is a simple diary for your medications and blood pressure: log and share with
         your clinician. It records what you enter; it doesn't give medical advice. Everything stays
-        on your device and works offline. No account, no ads, no subscription.
+        on your device and works offline. No account, no ads, no subscription. See Privacy and data for
+        what the page connects to, the optional PIN lock and backups.
       </p>
       <BpCategories />
       <p className="mt-4 text-[var(--muted)]">
@@ -144,7 +179,7 @@ function BpCategories() {
 function ComingSoon() {
   return (
     <p className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4 text-[var(--muted)]">
-      Carebook is in development: medications, today's doses, the history calendar, vitals and the PDF report work now; the features marked "coming soon" aren't available yet.
+      Carebook is in development ahead of its first release. All the features below work now.
     </p>
   )
 }

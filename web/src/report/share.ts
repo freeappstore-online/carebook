@@ -1,6 +1,8 @@
 // Hands the finished PDF to the user: the system share sheet where the browser
 // can share files, otherwise a download. Nothing is uploaded by Carebook.
 
+import { downloadBlob } from '../download'
+
 export type ShareOutcome = 'shared' | 'cancelled' | 'downloaded'
 
 interface ShareNavigator {
@@ -23,16 +25,7 @@ export function canSharePdf(nav: ShareNavigator = navigator): boolean {
 }
 
 export function downloadPdf(bytes: Uint8Array, name: string, doc: Document = document): void {
-  const url = URL.createObjectURL(pdfFile(bytes, name))
-  const a = doc.createElement('a')
-  a.href = url
-  a.download = name
-  a.rel = 'noopener'
-  doc.body.appendChild(a)
-  a.click()
-  a.remove()
-  // Give the browser a moment to start the download before freeing the blob.
-  setTimeout(() => URL.revokeObjectURL(url), 30_000)
+  downloadBlob(pdfFile(bytes, name), name, doc)
 }
 
 /** Shares the PDF if the browser can, else downloads it. */

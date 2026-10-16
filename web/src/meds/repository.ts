@@ -24,6 +24,9 @@ export interface CarebookDB extends DBSchema {
   meta: { key: string; value: unknown }
 }
 
+/** The stores that hold the user's data (not bookkeeping). */
+export const DATA_STORES = ['medications', 'adherence', 'vitals'] as const
+
 export function openCarebookDB(name = DB_NAME, onBlocking?: () => void): Promise<IDBPDatabase<CarebookDB>> {
   return openDB<CarebookDB>(name, SCHEMA_VERSION, {
     upgrade(db, _oldVersion, newVersion, tx) {
@@ -70,6 +73,12 @@ export interface MedicationRepository {
   /** Creates a reading, or updates it when `input.id` exists. Wall times are read in `timeZone`. */
   saveReading(input: ReadingInput, timeZone: string): Promise<Reading>
   removeReading(id: string): Promise<void>
+  /** Every record, for a backup. */
+  exportAll(): Promise<{ medications: Medication[]; adherence: DoseLog[]; vitals: Reading[] }>
+  /** Replaces every record with `data` in one transaction: all or nothing. */
+  replaceAll(data: { medications: Medication[]; adherence: DoseLog[]; vitals: Reading[] }): Promise<void>
+  /** Deletes every record. */
+  eraseAll(): Promise<void>
   close(): Promise<void>
 }
 
@@ -207,6 +216,46 @@ export function createMedicationRepository({
     },
     async removeReading(id) {
       await (await open()).delete('vitals', id)
+    },
+    async exportAll() {
+      const tx = (await open()).transaction(DATA_STORES, 'readonly')
+      const [medications, adherence, vitals] = await Promise.all([
+        tx.objectStore('medications').getAll(),
+        tx.objectStore('adherence').getAll(),
+        tx.objectStore('vitals').getAll(),
+      ])
+      await tx.done
+      return { medications, adherence, vitals }
+    },
+    async replaceAll(data) {
+      const tx = (await open()).transaction(DATA_STORES, 'readwrite')
+      // Requests run in the order they're made, so the clears happen before the
+      // puts. If any request fails the transaction aborts and `tx.done` rejects;
+      // each request's own rejection is handled here so only that one surfaces.
+      const run = (request: () => Promise<unknown>) => {
+        request().catch(() => {})
+      }
+      try {
+        for (const name of DATA_STORES) run(() => tx.objectStore(name).clear())
+        for (const m of data.medications) run(() => tx.objectStore('medications').put(m))
+        for (const l of data.adherence) run(() => tx.objectStore('adherence').put(l))
+        for (const r of data.vitals) run(() => tx.objectStore('vitals').put(r))
+      } catch (err) {
+        // A record IndexedDB refuses outright (e.g. no key): roll everything back.
+        try {
+          tx.abort()
+        } catch {
+          // Already aborted.
+        }
+        await tx.done.catch(() => {})
+        throw err
+      }
+      await tx.done
+    },
+    async eraseAll() {
+      const tx = (await open()).transaction(DATA_STORES, 'readwrite')
+      await Promise.all(DATA_STORES.map((name) => tx.objectStore(name).clear()))
+      await tx.done
     },
     async close() {
       if (!db) return
