@@ -15,7 +15,7 @@ export interface TodayScreenProps {
 }
 
 const button = 'rounded-[var(--radius)] border border-[var(--line-strong)] px-3 py-1.5 text-sm text-[var(--ink)]'
-const primary = 'rounded-[var(--radius)] bg-[var(--accent-deep)] px-3 py-1.5 text-sm font-semibold text-white'
+const primary = 'rounded-[var(--radius)] bg-[var(--ink)] px-3 py-1.5 text-sm font-semibold text-[var(--paper)]'
 
 /** Re-renders once a minute so "due" and "snoozed until" stay current. */
 function useMinuteTick(now: () => number) {
@@ -249,7 +249,7 @@ function DoseRow({ dose, med, log, now, timeZone, busy, onStatus, onUndo }: Dose
               className={button}
               disabled={busy}
               onClick={() => onStatus('snoozed')}
-              aria-label={`Snooze ${SNOOZE_MINUTES} minutes: ${label}`}
+              aria-label={`Snooze ${SNOOZE_MINUTES} min: ${label}`}
             >
               Snooze {SNOOZE_MINUTES} min
             </button>

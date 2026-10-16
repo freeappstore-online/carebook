@@ -21,5 +21,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // Node-side compliance tests (they read source files) have their own config with Node types.
+  "exclude": ["src/compliance"]
 }

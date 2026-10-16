@@ -232,3 +232,41 @@ a:focus-visible {
 /* Shell's text-size preference scales rem-based app typography. */
 :root[data-text='lg'] { font-size: 112.5%; }
 :root[data-text='sm'] { font-size: 87.5%; }
+
+/* App frame (as in the other FreeAppStore apps): fills the screen exactly. The
+   header stays put, each screen scrolls inside .cb-page, and the page itself
+   never scrolls, so short landscape phones fit (fas screencheck). */
+div:has(> main.fas-main) {
+  height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  min-height: 0 !important;
+}
+
+main.fas-main {
+  min-height: 0;
+}
+
+.cb-page {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* In the installed app the platform footer is pinned to the bottom. */
+@media (display-mode: standalone) {
+  .cb-page {
+    padding-bottom: 2.25rem;
+  }
+}
+
+/* SDK 0.15 Shell's topbar is a little too wide at 320px (text size, theme and
+   Sign in). Tighten its inline spacing on the narrowest phones only. */
+@media (max-width: 359px) {
+  div:has(> main.fas-main) > header {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  div:has(> main.fas-main) > header > div {
+    gap: 0.375rem !important;
+  }
+}

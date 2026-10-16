@@ -15,7 +15,7 @@ export interface VitalsScreenProps {
 
 type Editing = { mode: 'add' } | { mode: 'edit'; reading: Reading } | null
 
-const primaryButton = 'rounded-[var(--radius)] bg-[var(--accent-deep)] px-4 py-2 font-semibold text-white'
+const primaryButton = 'rounded-[var(--radius)] bg-[var(--ink)] px-4 py-2 font-semibold text-[var(--paper)]'
 const quietButton = 'rounded-[var(--radius)] border border-[var(--line-strong)] px-3 py-1.5 text-sm text-[var(--ink)]'
 
 const glucoseDecimals = (unit: string) => (unit === 'mmol/L' ? 1 : 0)

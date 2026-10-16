@@ -81,14 +81,14 @@ export function HistoryScreen({ now = Date.now, timeZone = deviceTimeZone }: His
       )}
 
       <div className="mb-3 flex items-center justify-between gap-2">
-        <button type="button" className={button} onClick={() => go(-1)} aria-label="Previous month">
-          ‹ Prev
+        <button type="button" className={button} onClick={() => go(-1)}>
+          <span aria-hidden>‹ </span>Previous month
         </button>
         <h2 className="text-lg font-semibold text-[var(--ink)]" aria-live="polite">
           {formatMonth(month)}
         </h2>
-        <button type="button" className={button} onClick={() => go(1)} disabled={isCurrentMonth} aria-label="Next month">
-          Next ›
+        <button type="button" className={button} onClick={() => go(1)} disabled={isCurrentMonth}>
+          Next month<span aria-hidden> ›</span>
         </button>
       </div>
 
@@ -114,7 +114,6 @@ export function HistoryScreen({ now = Date.now, timeZone = deviceTimeZone }: His
                     <button
                       type="button"
                       disabled={date > today}
-                      aria-label={dayLabel(date, day)}
                       aria-pressed={selected === date}
                       onClick={() => setSelected(selected === date ? null : date)}
                       className={`flex h-14 w-full flex-col items-center justify-center rounded-[var(--radius)] border text-[var(--ink)] disabled:opacity-40 ${
@@ -126,10 +125,14 @@ export function HistoryScreen({ now = Date.now, timeZone = deviceTimeZone }: His
                           : { background: `color-mix(in srgb, var(--sky) ${Math.round(shade * 0.45)}%, transparent)` }
                       }
                     >
-                      <span className="text-sm">{Number(date.slice(8))}</span>
+                      {/* The visible day and % are a summary; the button's name is the full sentence. */}
+                      <span className="text-sm" aria-hidden>
+                        {Number(date.slice(8))}
+                      </span>
                       <span className="text-xs tabular-nums text-[var(--muted)]" aria-hidden>
                         {day && day.due > 0 ? pct(day.percent) : ''}
                       </span>
+                      <span className="sr-only">{dayLabel(date, day)}</span>
                     </button>
                   </td>
                 )

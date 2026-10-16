@@ -63,7 +63,7 @@ describe('TodayScreen', () => {
     expect(await screen.findByRole('listitem', { name: 'Example at 08:00: Taken' })).toBeInTheDocument()
     expect(screen.getByText('1 of 1 due dose logged as taken, 1 still to come.')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Snooze 15 minutes: Example at 20:00' }))
+    await user.click(screen.getByRole('button', { name: 'Snooze 15 min: Example at 20:00' }))
     expect(await screen.findByRole('listitem', { name: 'Example at 20:00: Snoozed until 10:15' })).toBeInTheDocument()
     // A snoozed dose can still be logged.
     await user.click(screen.getByRole('button', { name: 'Skipped: Example at 20:00' }))

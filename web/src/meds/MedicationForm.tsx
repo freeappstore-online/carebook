@@ -91,7 +91,7 @@ export function MedicationForm({ medication, today, onSave, onCancel }: Medicati
   return (
     <form onSubmit={submit} noValidate className="grid gap-4">
       <p className="text-sm text-[var(--muted)]">
-        Enter the details as they appear on your prescription or pharmacy label. Carebook keeps a log;
+        Enter the details as they appear on the pharmacy label or packaging. Carebook keeps a log;
         it doesn’t check or suggest doses. Log and share with your clinician.
       </p>
 
@@ -245,7 +245,7 @@ export function MedicationForm({ medication, today, onSave, onCancel }: Medicati
           rows={3}
           value={draft.notes}
           maxLength={LIMITS.notes}
-          placeholder="For example, what the label says or who prescribed it"
+          placeholder="For example, what the label says"
           onChange={(e) => set('notes', e.target.value)}
         />
         {errorFor('notes')}
@@ -260,7 +260,7 @@ export function MedicationForm({ medication, today, onSave, onCancel }: Medicati
         <button
           type="submit"
           disabled={saving}
-          className="rounded-[var(--radius)] bg-[var(--accent-deep)] px-4 py-2 font-semibold text-white disabled:opacity-60"
+          className="rounded-[var(--radius)] bg-[var(--ink)] px-4 py-2 font-semibold text-[var(--paper)] disabled:opacity-60"
         >
           {medication ? 'Save changes' : 'Add medication'}
         </button>

@@ -85,8 +85,11 @@ export default function App() {
 
   return (
     <Shell app={fas} appName="Carebook" nav={NAV} onNavigate={navigate}>
-      <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">{screen(path, navigate, () => setLocked(true))}</div>
-      <BuildInfo />
+      {/* Each screen scrolls inside the app frame; the page itself never does. */}
+      <div className="cb-page">
+        <div className="mx-auto w-full max-w-3xl p-4 sm:p-8">{screen(path, navigate, () => setLocked(true))}</div>
+        <BuildInfo />
+      </div>
     </Shell>
   )
 }

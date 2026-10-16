@@ -1,11 +1,16 @@
 name: CI
 
+# Typecheck (app, compliance tests and e2e specs) and unit tests (Vitest),
+# including the banned-phrase and theme checks. E2E runs in e2e.yml.
+
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
 
 jobs:
-  typecheck:
+  unit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

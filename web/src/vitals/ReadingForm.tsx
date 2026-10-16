@@ -263,7 +263,7 @@ export function ReadingForm({ reading, now, units, onSave, onCancel }: ReadingFo
         <button
           type="submit"
           disabled={saving}
-          className="rounded-[var(--radius)] bg-[var(--accent-deep)] px-4 py-2 font-semibold text-white disabled:opacity-60"
+          className="rounded-[var(--radius)] bg-[var(--ink)] px-4 py-2 font-semibold text-[var(--paper)] disabled:opacity-60"
         >
           {reading ? 'Save changes' : 'Save reading'}
         </button>

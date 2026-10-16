@@ -9,12 +9,15 @@ expansion in `schedule.ts`/`zoned.ts` is DST/time-zone safe); dose logs, adheren
 Today/History screens in `web/src/today`; vitals, AHA BP labels (`bp.ts`, cited on About) and SVG charts in
 `web/src/vitals`; the PDF report (pdf-lib, lazy-loaded; licences in `THIRD-PARTY-LICENSES.md`) in
 `web/src/report`; the privacy note, PIN lock (salted PBKDF2 hash in localStorage) and JSON backups in
-`web/src/privacy`. IndexedDB `carebook` v3 (`medications`, `adherence`, `vitals`). Tests: `pnpm test`.
+`web/src/privacy`. IndexedDB `carebook` v3 (`medications`, `adherence`, `vitals`).
 
 - Live: https://carebook.freeappstore.online
 - Dev: `pnpm install && pnpm dev`
 - Build: `pnpm build`
-- Check: `fas check`
+- Unit tests: `pnpm test` (typecheck + Vitest in `web/src`, incl. banned-phrase and theme checks in
+  `web/src/compliance`)
+- E2E: `pnpm test:e2e` (Playwright in `e2e/`, built app: flows, offline PWA, axe in both themes)
+- Check: `fas check` and `fas screencheck`
 - Deploy: `git push origin main` (auto-deploys to R2 via GitHub Actions)
 
 ## Notes

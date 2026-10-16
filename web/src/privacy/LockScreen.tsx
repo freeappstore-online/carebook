@@ -73,7 +73,7 @@ export function LockScreen({ onUnlock, onErase, now = Date.now, storage = localS
         <button
           type="submit"
           disabled={!pin || checking || waitSeconds > 0}
-          className="rounded-[var(--radius)] bg-[var(--accent-deep)] px-4 py-2 font-semibold text-white disabled:opacity-60"
+          className="rounded-[var(--radius)] bg-[var(--ink)] px-4 py-2 font-semibold text-[var(--paper)] disabled:opacity-60"
         >
           Unlock
         </button>
