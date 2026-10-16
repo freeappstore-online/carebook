@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { initApp } from '@freeappstore/sdk'
 import { BuildInfo, type NavItem, PageHeader, Shell } from '@freeappstore/sdk/ui'
 import { MedicationsScreen } from './meds/MedicationsScreen'
+import { ReportScreen } from './report/ReportScreen'
 import { BP_CATEGORIES, BP_CATEGORY_LABELS, BP_CATEGORY_RANGES, BP_SOURCE } from './vitals/bp'
 import { VitalsScreen } from './vitals/VitalsScreen'
 import { HistoryScreen } from './today/HistoryScreen'
@@ -17,6 +18,7 @@ const NAV: NavItem[] = [
   { label: 'Medications', href: '/medications', title: 'Medications — Carebook' },
   { label: 'History', href: '/history', title: 'History — Carebook' },
   { label: 'Vitals', href: '/vitals', title: 'Vitals — Carebook' },
+  { label: 'Report', href: '/report', title: 'Report — Carebook' },
   { label: 'About', href: '/about', title: 'About — Carebook' },
 ]
 
@@ -27,7 +29,7 @@ const FEATURES = [
   { name: 'Today', what: 'Mark each dose taken, skipped or snoozed, with a history calendar.', ready: true },
   { name: 'Blood pressure', what: 'Log readings with pulse, arm and position, plus weight and glucose.', ready: true },
   { name: 'Trends', what: 'Charts and averages over 7, 30 and 90 days.', ready: true },
-  { name: 'PDF report', what: 'Make a PDF of your log for a date range to share with your clinician.' },
+  { name: 'PDF report', what: 'Make a PDF of your log for a date range to share with your clinician.', ready: true },
   { name: 'Private', what: 'Everything stays on your device. No account; optional PIN lock.' },
 ]
 
@@ -61,6 +63,7 @@ function screen(path: string, navigate: (href: string) => void) {
   if (path === '/medications') return <MedicationsScreen />
   if (path === '/history') return <HistoryScreen />
   if (path === '/vitals') return <VitalsScreen />
+  if (path === '/report') return <ReportScreen />
   return <TodayScreen onNavigate={navigate} />
 }
 
@@ -91,7 +94,8 @@ function About() {
         <a href="https://freeappstore.online" className="underline">
           FreeAppStore
         </a>
-        .
+        . The PDF report is made on your device with pdf-lib (MIT licence, © 2019 Andrew Dillon); see
+        THIRD-PARTY-LICENSES.md in the source for its licence and those of its dependencies.
       </p>
     </>
   )
@@ -140,7 +144,7 @@ function BpCategories() {
 function ComingSoon() {
   return (
     <p className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4 text-[var(--muted)]">
-      Carebook is in development: medications, today's doses, the history calendar and vitals work now; the features marked "coming soon" aren't available yet.
+      Carebook is in development: medications, today's doses, the history calendar, vitals and the PDF report work now; the features marked "coming soon" aren't available yet.
     </p>
   )
 }
