@@ -1,6 +1,6 @@
 # Carebook
 
-**Coming soon — a private medication and blood-pressure diary: log doses and vitals, see
+**a private medication and blood-pressure diary: log doses and vitals, see
 trends, and share a PDF with your clinician. Everything stays on your device.** A free app on
 [FreeAppStore](https://freeappstore.online), live at https://carebook.freeappstore.online.
 

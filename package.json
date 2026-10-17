@@ -1,6 +1,6 @@
 {
   "name": "carebook",
-  "description": "Coming soon — a private medication and blood-pressure diary: log doses and vitals, see trends, and share a PDF with your clinician. Everything stays on your device.",
+  "description": "a private medication and blood-pressure diary: log doses and vitals, see trends, and share a PDF with your clinician. Everything stays on your device.",
   "private": true,
   "packageManager": "pnpm@10.30.3",
   "engines": {
