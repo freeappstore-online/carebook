@@ -3,8 +3,8 @@
 Carebook: a private medication and blood-pressure diary on FreeAppStore — medications and
 schedules, a today view (taken/skipped/snoozed) with adherence history, BP/weight/glucose vitals
 with 7/30/90-day trends, a PDF report for the clinician, JSON export/import and an optional local
-PIN. Everything on the device (IndexedDB), no account. All v1 features work (freeappstore-online/platform#256),
-ahead of the Deploy ticket. Medications live in `web/src/meds` (schedule
+PIN. Everything on the device (IndexedDB), no account. All v1 features work (carebook#1–#7),
+and the app is live. Medications live in `web/src/meds` (schedule
 expansion in `schedule.ts`/`zoned.ts` is DST/time-zone safe); dose logs, adherence maths and the
 Today/History screens in `web/src/today`; vitals, AHA BP labels (`bp.ts`, cited on About) and SVG charts in
 `web/src/vitals`; the PDF report (pdf-lib, lazy-loaded; licences in `THIRD-PARTY-LICENSES.md`) in
