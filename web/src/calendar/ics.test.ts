@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { expandDoses } from '../meds/schedule'
 import type { Medication } from '../meds/types'
-import { timeAt } from '../meds/zoned'
+import { timeAt, zonedToEpoch } from '../meds/zoned'
 import { buildAllICS, buildICS, escapeICSText } from './ics'
 
 const at = Date.parse('2026-10-16T14:00:00Z')
@@ -81,6 +81,29 @@ describe('local calendar export', () => {
     expect(ics).toContain('DTSTART:20261031T013000')
     expect(ics.match(/BEGIN:VEVENT/g)).toHaveLength(1)
     expect(overlap.at).toBe(Date.parse('2026-11-01T05:30:00Z'))
+  })
+
+  it('exposes Melbourne spring gap behavior without assuming calendar clients reproduce it', () => {
+    const med: Medication = { ...base, startDate: '2026-10-03', schedule: { kind: 'daily', times: ['02:30'] } }
+    const ics = buildICS(med, 'Australia/Melbourne', at)!
+    const [gap] = expandDoses([med], { from: '2026-10-04', to: '2026-10-04', timeZone: 'Australia/Melbourne' })
+    expect(zonedToEpoch('2026-10-04', '02:30', 'Australia/Melbourne')).toBe(Date.parse('2026-10-03T16:30:00Z'))
+    expect(gap.at).toBe(Date.parse('2026-10-03T16:30:00Z'))
+    expect(timeAt(gap.at, 'Australia/Melbourne')).toBe('03:30')
+    expect(ics).toContain('DTSTART:20261003T023000')
+    expect(ics).toContain('RRULE:FREQ=DAILY')
+    // iCalendar recurrence clients may omit the nonexistent 02:30 on 4 October.
+  })
+
+  it('exposes Melbourne autumn overlap behavior without assuming calendar alarm timing', () => {
+    const med: Medication = { ...base, startDate: '2026-04-04', schedule: { kind: 'daily', times: ['02:30'] } }
+    const ics = buildICS(med, 'Australia/Melbourne', at)!
+    const [overlap] = expandDoses([med], { from: '2026-04-05', to: '2026-04-05', timeZone: 'Australia/Melbourne' })
+    expect(zonedToEpoch('2026-04-05', '02:30', 'Australia/Melbourne')).toBe(Date.parse('2026-04-04T15:30:00Z'))
+    expect(overlap.at).toBe(Date.parse('2026-04-04T15:30:00Z'))
+    expect(timeAt(overlap.at, 'Australia/Melbourne')).toBe('02:30')
+    expect(ics).toContain('DTSTART:20260404T023000')
+    expect(ics.match(/BEGIN:VEVENT/g)).toHaveLength(1)
   })
 
   it('includes an end-date dose, including 23:59, then ends recurrence', () => {
