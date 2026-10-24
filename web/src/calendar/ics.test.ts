@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
+import { expandDoses } from '../meds/schedule'
 import type { Medication } from '../meds/types'
+import { timeAt } from '../meds/zoned'
 import { buildAllICS, buildICS, escapeICSText } from './ics'
 
 const at = Date.parse('2026-10-16T14:00:00Z')
@@ -56,11 +58,43 @@ describe('local calendar export', () => {
     expect(ics).not.toMatch(/(?<!\r)\n/)
   })
 
-  it('keeps wall clock recurrence across DST and rejects invalid zones', () => {
+  it('uses floating local times, with an explicit spring-gap parity limit', () => {
     const ics = buildICS({ ...base, startDate: '2026-03-07', schedule: { kind: 'daily', times: ['08:00'] } }, 'America/New_York', at)!
     expect(ics).toContain('DTSTART:20260307T080000')
     expect(ics).not.toContain('DTSTART;TZID=')
     expect(ics).toContain('RRULE:FREQ=DAILY')
+    const gapMed: Medication = { ...base, startDate: '2026-03-07', schedule: { kind: 'daily', times: ['02:30'] } }
+    const gapICS = buildICS(gapMed, 'America/New_York', at)!
+    const [gap] = expandDoses([gapMed], { from: '2026-03-08', to: '2026-03-08', timeZone: 'America/New_York' })
+    expect(gapICS).toContain('DTSTART:20260307T023000')
+    expect(gapICS).toContain('RRULE:FREQ=DAILY')
+    expect(timeAt(gap.at, 'America/New_York')).toBe('03:30')
+    // RFC recurrence consumers can omit this nonexistent 02:30 occurrence.
+    // A generated RRULE cannot promise Carebook's 03:30 gap resolution.
     expect(() => buildICS(base, 'Mars/Olympus', at)).toThrow('Invalid time zone')
+  })
+
+  it('keeps one ambiguous fall-overlap event while Carebook picks the first occurrence', () => {
+    const overlapMed: Medication = { ...base, startDate: '2026-10-31', schedule: { kind: 'daily', times: ['01:30'] } }
+    const ics = buildICS(overlapMed, 'America/New_York', at)!
+    const [overlap] = expandDoses([overlapMed], { from: '2026-11-01', to: '2026-11-01', timeZone: 'America/New_York' })
+    expect(ics).toContain('DTSTART:20261031T013000')
+    expect(ics.match(/BEGIN:VEVENT/g)).toHaveLength(1)
+    expect(overlap.at).toBe(Date.parse('2026-11-01T05:30:00Z'))
+  })
+
+  it('includes an end-date dose, including 23:59, then ends recurrence', () => {
+    const ending: Medication = { ...base, startDate: '2026-10-16', endDate: '2026-10-17', schedule: { kind: 'daily', times: ['23:59'] } }
+    const ics = buildICS(ending, 'UTC', at)!
+    expect(ics).toContain('DTSTART:20261016T235900')
+    expect(ics).toContain('RRULE:FREQ=DAILY;UNTIL=20261017T235900')
+    expect(expandDoses([ending], { from: '2026-10-16', to: '2026-10-18', timeZone: 'UTC' }).map((dose) => dose.date)).toEqual(['2026-10-16', '2026-10-17'])
+  })
+
+  it('begins weekly recurrence on the first eligible day and omits impossible windows', () => {
+    const weekly: Medication = { ...base, startDate: '2026-10-17', schedule: { kind: 'weekly', days: [0, 1], times: ['09:00'] } }
+    expect(buildICS(weekly, 'UTC', at)).toContain('DTSTART:20261018T090000')
+    expect(buildICS({ ...weekly, endDate: '2026-10-17' }, 'UTC', at)).toBeNull()
+    expect(expandDoses([weekly], { from: '2026-10-17', to: '2026-10-19', timeZone: 'UTC' }).map((dose) => dose.date)).toEqual(['2026-10-18', '2026-10-19'])
   })
 })

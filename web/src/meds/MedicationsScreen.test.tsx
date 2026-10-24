@@ -54,6 +54,7 @@ describe('MedicationsScreen', () => {
       await repo.save({ name: 'As needed', strength: '', form: 'tablet', schedule: { kind: 'as-needed' }, startDate: '2026-10-01', notes: '' })
     })
     expect(await screen.findByText(/your calendar may sync them to the cloud/i)).toBeInTheDocument()
+    expect(screen.getByText(/calendar apps may interpret skipped or repeated times near clock changes differently/i)).toBeInTheDocument()
     expect(screen.getByText('As-needed medications have no scheduled calendar events.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Add to Calendar for As needed' })).not.toBeInTheDocument()
     const before = await repo.exportAll()
@@ -71,6 +72,20 @@ describe('MedicationsScreen', () => {
     expect(downloads[1].download).toBe('carebook-reminders.ics')
     expect((await blobs[1].text()).match(/BEGIN:VEVENT/g)).toHaveLength(1)
     expect(await blobs[1].text()).not.toContain('As needed')
+    expect(await repo.exportAll()).toEqual(before)
+  })
+
+  it('keeps every local record when a calendar download fails', async () => {
+    const { repo, user } = await setup(async (repo) => {
+      const med = await repo.save({ name: 'Example', strength: '10 mg', form: 'tablet', schedule: { kind: 'daily', times: ['08:00'] }, startDate: '2026-10-01', notes: '' })
+      await repo.setStatus({ key: `${med.id}|2026-10-16|08:00`, medicationId: med.id, date: '2026-10-16', time: '08:00' }, 'taken')
+      await repo.saveReading({ date: '2026-10-16', time: '09:00', systolic: 120, diastolic: 80, pulse: 60 }, 'America/New_York')
+    })
+    const before = await repo.exportAll()
+    URL.createObjectURL = vi.fn(() => { throw new Error('download unavailable') })
+    await user.click(await screen.findByRole('button', { name: 'Add to Calendar for Example' }))
+    expect(screen.getByRole('status')).toHaveTextContent('Couldn’t make the calendar file on this device.')
+    expect(downloads).toHaveLength(0)
     expect(await repo.exportAll()).toEqual(before)
   })
 

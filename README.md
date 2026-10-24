@@ -21,10 +21,14 @@ On Medications, **Add to Calendar** downloads one medication's recurring events;
 **Export all reminders** combines scheduled medications. As-needed medications have no events.
 The `.ics` file is built in the browser, with neutral event and alert text. The event times
 can still be sensitive. Import the file into a calendar app if you choose; that app may
-sync events to the cloud and controls alarm permissions and delivery. The events follow local
-clock time across daylight-saving changes. Imported events are separate copies: changing,
+sync events to the cloud and controls alarm permissions and delivery. Events use local clock
+times, but calendar apps may interpret skipped or repeated times near clock changes differently
+from Carebook. Review imported events near daylight-saving changes. Imported events are separate copies: changing,
 stopping or removing medication in Carebook does not update them. Remove or replace old events
 before importing again to avoid duplicates. Export works offline after the app is available.
+
+The automated tests verify the generated file and browser download with synthetic data. They
+do not import events into iOS or Android calendars or verify either platform's alarm delivery.
 
 ## Develop
 

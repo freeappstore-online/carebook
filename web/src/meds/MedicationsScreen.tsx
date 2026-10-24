@@ -93,7 +93,7 @@ export function MedicationsScreen({ now = Date.now, timeZone = deviceTimeZone }:
           <section aria-label="Calendar reminders" className="mb-4 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
             <h2 className="font-semibold text-[var(--ink)]">Calendar reminders</h2>
             <p className="mt-1 text-sm text-[var(--muted)]">
-              Save a calendar file, then review and import it into your chosen calendar app. Event and alert text is neutral, but the times can be sensitive and your calendar may sync them to the cloud. Events follow local clock time, including daylight-saving changes. Edits, stopping a medication and deleting Carebook data do not change imported events: remove or replace old events yourself. Importing twice may create duplicates. Your calendar app controls alerts, permissions and delivery.
+              Save a calendar file, then review and import it into your chosen calendar app. Event and alert text is neutral, but the times can be sensitive and your calendar may sync them to the cloud. Events use local clock times. Calendar apps may interpret skipped or repeated times near clock changes differently from Carebook; review imported events near daylight-saving changes. Edits, stopping a medication and deleting Carebook data do not change imported events: remove or replace old events yourself. Importing twice may create duplicates. Your calendar app controls alerts, permissions and delivery.
             </p>
             <button type="button" className={`${quietButton} mt-3`} disabled={!meds.some((med) => med.schedule.kind !== 'as-needed')} onClick={() => downloadCalendar(meds, 'carebook-reminders.ics')}>
               Export all reminders

@@ -59,8 +59,9 @@ function eventLines(med: Medication, at: number): string[] {
     'BEGIN:VEVENT',
     `UID:${opaqueUid(med.id, time)}`,
     `DTSTAMP:${dtstamp}`,
-    // Floating times match Carebook's schedule: the same wall time in the
-    // calendar's current zone, including after travel or a DST change.
+    // Floating times request the same local wall time in the importing
+    // calendar. RFC recurrence handling of nonexistent/ambiguous local times
+    // can differ from Carebook's gap/overlap rules; the UI discloses this.
     `DTSTART:${localStamp(first, time)}`,
     'DURATION:PT5M',
     `RRULE:${rule}${med.endDate ? `;UNTIL=${localStamp(med.endDate, '23:59')}` : ''}`,
