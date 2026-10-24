@@ -4,7 +4,8 @@ test('the privacy note discloses what the page connects to', async ({ page, host
   await open(page)
   await navTo(page, 'Privacy')
   const note = page.getByRole('region', { name: 'Your privacy' })
-  await expect(note).toContainText('There is no Carebook account and no cloud sync')
+  await expect(note).toContainText('There is no Carebook account or Carebook cloud sync')
+  await expect(note).toContainText('calendar app may sync events to the cloud')
   await expect(note).toContainText('api.freeappstore.online')
   await expect(note).toContainText('Log and share with your clinician')
   // The only outside host the page tried to reach is the platform's (analytics / API).

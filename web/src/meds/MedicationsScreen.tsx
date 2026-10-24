@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ConfirmDialog, EmptyState, Modal, PageHeader } from '@freeappstore/sdk/ui'
+import { buildAllICS, buildICS } from '../calendar/ics'
+import { downloadBlob } from '../download'
 import { MedicationForm } from './MedicationForm'
 import { useMedicationRepo } from './RepoContext'
 import { describeSchedule, nextDose } from './schedule'
@@ -22,6 +24,7 @@ export function MedicationsScreen({ now = Date.now, timeZone = deviceTimeZone }:
   const [loadError, setLoadError] = useState(false)
   const [editing, setEditing] = useState<Editing>(null)
   const [removing, setRemoving] = useState<Medication | null>(null)
+  const [calendarStatus, setCalendarStatus] = useState<string | null>(null)
 
   const reload = useCallback(async () => {
     try {
@@ -51,6 +54,16 @@ export function MedicationsScreen({ now = Date.now, timeZone = deviceTimeZone }:
 
   const zone = timeZone()
   const today = dateAt(now(), zone)
+  const downloadCalendar = (selected: readonly Medication[], fileName: string) => {
+    try {
+      const ics = selected.length === 1 ? buildICS(selected[0], zone, now()) : buildAllICS(selected, zone, now())
+      if (!ics) return setCalendarStatus('No scheduled calendar events to export.')
+      downloadBlob(new Blob([ics], { type: 'text/calendar;charset=utf-8' }), fileName)
+      setCalendarStatus(`Downloaded ${fileName}. Import it into your calendar app.`)
+    } catch {
+      setCalendarStatus('Couldn’t make the calendar file on this device.')
+    }
+  }
   const add = (
     <button type="button" className={primaryButton} onClick={() => setEditing({ mode: 'add' })}>
       Add medication
@@ -76,8 +89,19 @@ export function MedicationsScreen({ now = Date.now, timeZone = deviceTimeZone }:
       )}
 
       {meds && meds.length > 0 && (
-        <ul className="grid gap-3" aria-label="Medications">
-          {meds.map((med) => (
+        <>
+          <section aria-label="Calendar reminders" className="mb-4 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
+            <h2 className="font-semibold text-[var(--ink)]">Calendar reminders</h2>
+            <p className="mt-1 text-sm text-[var(--muted)]">
+              Save a calendar file, then review and import it into your chosen calendar app. Event and alert text is neutral, but the times can be sensitive and your calendar may sync them to the cloud. Events follow local clock time, including daylight-saving changes. Edits, stopping a medication and deleting Carebook data do not change imported events: remove or replace old events yourself. Importing twice may create duplicates. Your calendar app controls alerts, permissions and delivery.
+            </p>
+            <button type="button" className={`${quietButton} mt-3`} disabled={!meds.some((med) => med.schedule.kind !== 'as-needed')} onClick={() => downloadCalendar(meds, 'carebook-reminders.ics')}>
+              Export all reminders
+            </button>
+            <p className="mt-2 text-sm text-[var(--muted)]" role="status">{calendarStatus}</p>
+          </section>
+          <ul className="grid gap-3" aria-label="Medications">
+            {meds.map((med) => (
             <MedicationCard
               key={med.id}
               med={med}
@@ -86,9 +110,11 @@ export function MedicationsScreen({ now = Date.now, timeZone = deviceTimeZone }:
               today={today}
               onEdit={() => setEditing({ mode: 'edit', medication: med })}
               onRemove={() => setRemoving(med)}
+              onCalendar={() => downloadCalendar([med], 'carebook-reminder.ics')}
             />
-          ))}
-        </ul>
+            ))}
+          </ul>
+        </>
       )}
 
       <Modal
@@ -127,9 +153,10 @@ interface CardProps {
   today: string
   onEdit: () => void
   onRemove: () => void
+  onCalendar: () => void
 }
 
-function MedicationCard({ med, now, timeZone, today, onEdit, onRemove }: CardProps) {
+function MedicationCard({ med, now, timeZone, today, onEdit, onRemove, onCalendar }: CardProps) {
   const ended = med.endDate !== undefined && med.endDate < today
   const next = ended ? undefined : nextDose(med, now, timeZone)
   const detail = [med.strength, FORM_LABELS[med.form]].filter(Boolean).join(' · ')
@@ -141,7 +168,12 @@ function MedicationCard({ med, now, timeZone, today, onEdit, onRemove }: CardPro
           <h2 className="font-semibold text-[var(--ink)]">{med.name}</h2>
           <p className="text-sm text-[var(--muted)]">{detail}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          {med.schedule.kind !== 'as-needed' && (
+            <button type="button" className={quietButton} onClick={onCalendar} aria-label={`Add to Calendar for ${med.name}`}>
+              Add to Calendar
+            </button>
+          )}
           <button type="button" className={quietButton} onClick={onEdit} aria-label={`Edit ${med.name}`}>
             Edit
           </button>
@@ -151,6 +183,7 @@ function MedicationCard({ med, now, timeZone, today, onEdit, onRemove }: CardPro
         </div>
       </div>
       <p className="mt-2 text-[var(--ink)]">{describeSchedule(med.schedule)}</p>
+      {med.schedule.kind === 'as-needed' && <p className="text-sm text-[var(--muted)]">As-needed medications have no scheduled calendar events.</p>}
       <p className="text-sm text-[var(--muted)]">
         {ended
           ? `Ended ${med.endDate}`

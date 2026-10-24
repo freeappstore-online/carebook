@@ -6,11 +6,15 @@
 export const PRIVACY_POINTS = [
   {
     title: 'Everything stays on this device',
-    text: 'Your medications, dose log and readings are stored only in this browser on this device (IndexedDB). There is no Carebook account and no cloud sync. Reports and backups are made on the device and only leave it when you share or save them.',
+    text: 'Your medications, dose log and readings are stored only in this browser on this device (IndexedDB). There is no Carebook account or Carebook cloud sync. Reports, backups and calendar files are made on the device and only leave it when you share, save or import them elsewhere.',
   },
   {
     title: 'Analytics',
     text: 'The page loads the FreeAppStore analytics script from api.freeappstore.online (Cloudflare Web Analytics by default). It counts visits and which screens are opened, with details such as browser type and country. Carebook never sends it what you enter.',
+  },
+  {
+    title: 'Calendar reminders',
+    text: 'Add to Calendar creates a file on this device with neutral event text and scheduled times. Times can still be sensitive. The file only leaves Carebook when you import or share it, and your calendar app may sync events to the cloud. Imported events are separate copies: changing or deleting Carebook data does not update or remove them.',
   },
   {
     title: 'Optional FreeAppStore sign-in',

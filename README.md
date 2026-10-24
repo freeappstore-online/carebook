@@ -15,6 +15,17 @@ or cloud sync. See the in-app privacy note for the platform analytics disclosure
 The v1 work is tracked in [carebook#1](https://github.com/freeappstore-online/carebook/issues/1)
 and its completed follow-up issues [#2–#7](https://github.com/freeappstore-online/carebook/issues).
 
+## Calendar reminders
+
+On Medications, **Add to Calendar** downloads one medication's recurring events;
+**Export all reminders** combines scheduled medications. As-needed medications have no events.
+The `.ics` file is built in the browser, with neutral event and alert text. The event times
+can still be sensitive. Import the file into a calendar app if you choose; that app may
+sync events to the cloud and controls alarm permissions and delivery. The events follow local
+clock time across daylight-saving changes. Imported events are separate copies: changing,
+stopping or removing medication in Carebook does not update them. Remove or replace old events
+before importing again to avoid duplicates. Export works offline after the app is available.
+
 ## Develop
 
 ```bash

@@ -1,4 +1,4 @@
-import { addMedication, expect, open, test } from './fixtures'
+import { addMedication, expect, open, readDownload, test } from './fixtures'
 
 test('adds a medication and lists it with its schedule', async ({ page }) => {
   await open(page)
@@ -28,4 +28,33 @@ test('edits and removes a medication', async ({ page }) => {
   await page.getByRole('button', { name: 'Remove Medication Alpha' }).click()
   await page.getByRole('dialog').getByRole('button', { name: 'Remove' }).click()
   await expect(page.getByText('No medications yet')).toBeVisible()
+})
+
+test('exports neutral recurring calendar events offline without changing records', async ({ page, context }) => {
+  await open(page)
+  await addMedication(page, 'Medication Alpha', ['08:00', '20:00'], '10 mg')
+  const externalPosts: string[] = []
+  page.on('request', (request) => {
+    if (request.method() !== 'GET' && !request.url().startsWith('http://localhost:')) externalPosts.push(request.url())
+  })
+
+  await context.setOffline(true)
+  try {
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'Add to Calendar for Medication Alpha' }).click(),
+    ])
+    expect(download.suggestedFilename()).toBe('carebook-reminder.ics')
+    const ics = readDownload(await download.path()).toString('utf8')
+    expect(ics).toContain('RRULE:FREQ=DAILY')
+    expect(ics).toContain('DTSTART:')
+    expect(ics).toContain('SUMMARY:Reminder')
+    expect(ics).toContain('BEGIN:VALARM')
+    expect(ics).not.toContain('Medication Alpha')
+    expect(ics).not.toContain('10 mg')
+    expect(externalPosts).toEqual([])
+    await expect(page.getByRole('heading', { name: 'Medication Alpha' })).toBeVisible()
+  } finally {
+    await context.setOffline(false)
+  }
 })

@@ -3,7 +3,7 @@ import 'fake-indexeddb/auto'
 import '@testing-library/jest-dom/vitest'
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MedicationRepoContext } from './RepoContext'
 import { MedicationsScreen } from './MedicationsScreen'
 import { type MedicationRepository, createMedicationRepository } from './repository'
@@ -13,6 +13,21 @@ const repos: MedicationRepository[] = []
 
 // 14:00 UTC on 16 October 2026 is 10:00 in New York.
 const NOW = Date.parse('2026-10-16T14:00:00Z')
+const downloads: HTMLAnchorElement[] = []
+const blobs: Blob[] = []
+
+beforeEach(() => {
+  downloads.length = 0
+  blobs.length = 0
+  URL.createObjectURL = vi.fn((blob: Blob) => {
+    blobs.push(blob)
+    return 'blob:calendar'
+  })
+  URL.revokeObjectURL = vi.fn()
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
+    downloads.push(this)
+  })
+})
 
 async function setup(seed: (repo: MedicationRepository) => Promise<unknown> = async () => {}) {
   const repo = createMedicationRepository({ dbName: `screen-${++dbCount}` })
@@ -28,10 +43,37 @@ async function setup(seed: (repo: MedicationRepository) => Promise<unknown> = as
 
 afterEach(async () => {
   cleanup()
+  vi.restoreAllMocks()
   await Promise.all(repos.splice(0).map((r) => r.close()))
 })
 
 describe('MedicationsScreen', () => {
+  it('downloads one or all calendar reminders locally and explains sync', async () => {
+    const { repo, user } = await setup(async (repo) => {
+      await repo.save({ name: 'Example', strength: '10 mg', form: 'tablet', schedule: { kind: 'daily', times: ['08:00'] }, startDate: '2026-10-01', notes: '' })
+      await repo.save({ name: 'As needed', strength: '', form: 'tablet', schedule: { kind: 'as-needed' }, startDate: '2026-10-01', notes: '' })
+    })
+    expect(await screen.findByText(/your calendar may sync them to the cloud/i)).toBeInTheDocument()
+    expect(screen.getByText('As-needed medications have no scheduled calendar events.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add to Calendar for As needed' })).not.toBeInTheDocument()
+    const before = await repo.exportAll()
+
+    await user.click(screen.getByRole('button', { name: 'Add to Calendar for Example' }))
+    expect(downloads).toHaveLength(1)
+    expect(downloads[0].download).toBe('carebook-reminder.ics')
+    expect(blobs[0].type).toBe('text/calendar;charset=utf-8')
+    expect(await blobs[0].text()).toContain('SUMMARY:Reminder')
+    expect(await blobs[0].text()).not.toContain('Example')
+    expect(await blobs[0].text()).not.toContain('10 mg')
+
+    await user.click(screen.getByRole('button', { name: 'Export all reminders' }))
+    expect(downloads).toHaveLength(2)
+    expect(downloads[1].download).toBe('carebook-reminders.ics')
+    expect((await blobs[1].text()).match(/BEGIN:VEVENT/g)).toHaveLength(1)
+    expect(await blobs[1].text()).not.toContain('As needed')
+    expect(await repo.exportAll()).toEqual(before)
+  })
+
   it('adds a medication with a daily schedule and shows the next dose', async () => {
     const { repo, user } = await setup()
     await user.click(await screen.findByRole('button', { name: 'Add medication' }))
