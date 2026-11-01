@@ -13,11 +13,11 @@ export interface PrivacyScreenProps {
   storage?: Storage
 }
 
-const field = 'mt-1 w-full rounded-[var(--radius)] border border-[var(--line-strong)] bg-[var(--paper)] px-3 py-2 text-[var(--ink)]'
-const label = 'block text-sm font-semibold text-[var(--ink)]'
-const primary = 'rounded-[var(--radius)] bg-[var(--ink)] px-4 py-2 font-semibold text-[var(--paper)] disabled:opacity-60'
-const quiet = 'rounded-[var(--radius)] border border-[var(--line-strong)] px-4 py-2 text-[var(--ink)] disabled:opacity-60'
-const card = 'mt-6 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4'
+const field = 'mt-1 w-full rounded-fas border border-line-strong bg-paper px-3 py-2 text-ink'
+const label = 'block text-sm font-semibold text-ink'
+const primary = 'rounded-fas bg-ink px-4 py-2 font-semibold text-paper disabled:opacity-60'
+const quiet = 'rounded-fas border border-line-strong px-4 py-2 text-ink disabled:opacity-60'
+const card = 'mt-6 rounded-fas border border-line bg-panel p-4'
 
 export function PrivacyScreen({ onLock, now = Date.now, storage = localStorage }: PrivacyScreenProps) {
   return (
@@ -60,10 +60,10 @@ function PinSettings({ onLock, storage }: { onLock?: () => void; storage: Storag
 
   return (
     <section aria-labelledby="pin-heading" className={card}>
-      <h2 id="pin-heading" className="text-lg font-semibold text-[var(--ink)]">
+      <h2 id="pin-heading" className="text-lg font-semibold text-ink">
         PIN lock
       </h2>
-      <p className="mt-1 text-[var(--muted)]">
+      <p className="mt-1 text-muted">
         {enabled
           ? 'On. Carebook asks for your PIN each time it opens and after it’s been in the background for 5 minutes.'
           : 'Off. Add a PIN so Carebook asks for it each time it opens.'}{' '}
@@ -76,7 +76,7 @@ function PinSettings({ onLock, storage }: { onLock?: () => void; storage: Storag
         <form onSubmit={save} noValidate className="mt-3 grid gap-3 sm:max-w-xs">
           <div>
             <label className={label} htmlFor="new-pin">
-              {enabled ? 'New PIN' : 'PIN'} <span className="font-normal text-[var(--muted)]">(4 to 8 digits)</span>
+              {enabled ? 'New PIN' : 'PIN'} <span className="font-normal text-muted">(4 to 8 digits)</span>
             </label>
             <input id="new-pin" className={field} type="password" inputMode="numeric" autoComplete="new-password" value={pin} onChange={(e) => setPinValue(digits(e.target.value))} />
           </div>
@@ -87,7 +87,7 @@ function PinSettings({ onLock, storage }: { onLock?: () => void; storage: Storag
             <input id="confirm-pin" className={field} type="password" inputMode="numeric" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(digits(e.target.value))} />
           </div>
           {error && (
-            <p role="alert" className="text-sm text-[var(--danger)]">
+            <p role="alert" className="text-sm text-danger">
               {error}
             </p>
           )}
@@ -119,7 +119,7 @@ function PinSettings({ onLock, storage }: { onLock?: () => void; storage: Storag
           )}
         </div>
       )}
-      <p className="mt-2 text-sm text-[var(--muted)]" aria-live="polite">
+      <p className="mt-2 text-sm text-muted" aria-live="polite">
         {status}
       </p>
 
@@ -194,10 +194,10 @@ function Backups({ now }: { now: () => number }) {
 
   return (
     <section aria-labelledby="backup-heading" className={card}>
-      <h2 id="backup-heading" className="text-lg font-semibold text-[var(--ink)]">
+      <h2 id="backup-heading" className="text-lg font-semibold text-ink">
         Back up and restore
       </h2>
-      <p className="mt-1 text-[var(--muted)]">
+      <p className="mt-1 text-muted">
         Export saves everything Carebook holds (medications, dose log and readings) as one JSON file. It isn’t encrypted,
         so keep it somewhere private. Import replaces what’s on this device with a backup. The PIN isn’t included.
       </p>
@@ -219,11 +219,11 @@ function Backups({ now }: { now: () => number }) {
         />
       </div>
       {error && (
-        <p role="alert" className="mt-2 text-sm text-[var(--danger)]">
+        <p role="alert" className="mt-2 text-sm text-danger">
           {error}
         </p>
       )}
-      <p className="mt-2 text-sm text-[var(--muted)]" aria-live="polite">
+      <p className="mt-2 text-sm text-muted" aria-live="polite">
         {busy ? 'Importing…' : status}
       </p>
 

@@ -14,8 +14,8 @@ export interface TodayScreenProps {
   onNavigate?: (href: string) => void
 }
 
-const button = 'rounded-[var(--radius)] border border-[var(--line-strong)] px-3 py-1.5 text-sm text-[var(--ink)]'
-const primary = 'rounded-[var(--radius)] bg-[var(--ink)] px-3 py-1.5 text-sm font-semibold text-[var(--paper)]'
+const button = 'rounded-fas border border-line-strong px-3 py-1.5 text-sm text-ink'
+const primary = 'rounded-fas bg-ink px-3 py-1.5 text-sm font-semibold text-paper'
 
 /** Re-renders once a minute so "due" and "snoozed until" stay current. */
 function useMinuteTick(now: () => number) {
@@ -79,7 +79,7 @@ export function TodayScreen({ now = Date.now, timeZone = deviceTimeZone, onNavig
       />
 
       {loadError && (
-        <p role="alert" className="rounded-[var(--radius)] border border-[var(--line)] p-4 text-[var(--danger)]">
+        <p role="alert" className="rounded-fas border border-line p-4 text-danger">
           Couldn’t open storage on this device. Private browsing can block it.
         </p>
       )}
@@ -106,7 +106,7 @@ export function TodayScreen({ now = Date.now, timeZone = deviceTimeZone, onNavig
 
       {meds && meds.length > 0 && (
         <>
-          <p className="mb-4 text-[var(--ink)]" aria-live="polite">
+          <p className="mb-4 text-ink" aria-live="polite">
             {summary.due + summary.upcoming === 0
               ? 'No scheduled doses today.'
               : `${summary.taken} of ${summary.due} due ${summary.due === 1 ? 'dose' : 'doses'} logged as taken` +
@@ -133,14 +133,14 @@ export function TodayScreen({ now = Date.now, timeZone = deviceTimeZone, onNavig
 
           {asNeeded.length > 0 && (
             <section className="mt-8" aria-labelledby="as-needed-heading">
-              <h2 id="as-needed-heading" className="mb-2 text-lg font-semibold text-[var(--ink)]">
+              <h2 id="as-needed-heading" className="mb-2 text-lg font-semibold text-ink">
                 As needed
               </h2>
               <ul className="grid gap-3">
                 {asNeeded.map((med) => {
                   const taken = logs.filter((l) => l.asNeeded && l.medicationId === med.id)
                   return (
-                    <li key={med.id} className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
+                    <li key={med.id} className="rounded-fas border border-line bg-panel p-4">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <MedName med={med} />
                         <button
@@ -156,7 +156,7 @@ export function TodayScreen({ now = Date.now, timeZone = deviceTimeZone, onNavig
                       {taken.length > 0 && (
                         <ul className="mt-2 flex flex-wrap gap-2" aria-label={`${med.name} doses logged today`}>
                           {taken.map((log) => (
-                            <li key={log.key} className="flex items-center gap-2 text-sm text-[var(--muted)]">
+                            <li key={log.key} className="flex items-center gap-2 text-sm text-muted">
                               Taken at {log.time}
                               <button
                                 type="button"
@@ -186,8 +186,8 @@ function MedName({ med }: { med: Medication }) {
   const detail = [med.strength, FORM_LABELS[med.form]].filter(Boolean).join(' · ')
   return (
     <div>
-      <p className="font-semibold text-[var(--ink)]">{med.name}</p>
-      <p className="text-sm text-[var(--muted)]">{detail}</p>
+      <p className="font-semibold text-ink">{med.name}</p>
+      <p className="text-sm text-muted">{detail}</p>
     </div>
   )
 }
@@ -218,18 +218,18 @@ function DoseRow({ dose, med, log, now, timeZone, busy, onStatus, onUndo }: Dose
 
   return (
     <li
-      className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4"
+      className="rounded-fas border border-line bg-panel p-4"
       aria-label={`${label}: ${state}`}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex gap-4">
-          <p className="w-14 font-semibold tabular-nums text-[var(--ink)]">
+          <p className="w-14 font-semibold tabular-nums text-ink">
             {dose.time}
-            {actual !== dose.time && <span className="block text-xs font-normal text-[var(--muted)]">({actual})</span>}
+            {actual !== dose.time && <span className="block text-xs font-normal text-muted">({actual})</span>}
           </p>
           <MedName med={med} />
         </div>
-        <p className="text-sm font-semibold text-[var(--muted)]">{state}</p>
+        <p className="text-sm font-semibold text-muted">{state}</p>
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
         {log && log.status !== 'snoozed' ? (

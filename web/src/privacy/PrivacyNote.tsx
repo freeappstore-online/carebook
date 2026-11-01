@@ -28,15 +28,15 @@ export const PRIVACY_POINTS = [
 
 export function PrivacyNote() {
   return (
-    <section aria-labelledby="privacy-heading" className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
-      <h2 id="privacy-heading" className="text-lg font-semibold text-[var(--ink)]">
+    <section aria-labelledby="privacy-heading" className="rounded-fas border border-line bg-panel p-4">
+      <h2 id="privacy-heading" className="text-lg font-semibold text-ink">
         Your privacy
       </h2>
       <dl className="mt-2 grid gap-3">
         {PRIVACY_POINTS.map((p) => (
           <div key={p.title}>
-            <dt className="font-semibold text-[var(--ink)]">{p.title}</dt>
-            <dd className="text-[var(--muted)]">{p.text}</dd>
+            <dt className="font-semibold text-ink">{p.title}</dt>
+            <dd className="text-muted">{p.text}</dd>
           </div>
         ))}
       </dl>

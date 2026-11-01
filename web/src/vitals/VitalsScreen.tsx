@@ -15,8 +15,8 @@ export interface VitalsScreenProps {
 
 type Editing = { mode: 'add' } | { mode: 'edit'; reading: Reading } | null
 
-const primaryButton = 'rounded-[var(--radius)] bg-[var(--ink)] px-4 py-2 font-semibold text-[var(--paper)]'
-const quietButton = 'rounded-[var(--radius)] border border-[var(--line-strong)] px-3 py-1.5 text-sm text-[var(--ink)]'
+const primaryButton = 'rounded-fas bg-ink px-4 py-2 font-semibold text-paper'
+const quietButton = 'rounded-fas border border-line-strong px-3 py-1.5 text-sm text-ink'
 
 const glucoseDecimals = (unit: string) => (unit === 'mmol/L' ? 1 : 0)
 
@@ -99,7 +99,7 @@ export function VitalsScreen({ now = Date.now, timeZone = deviceTimeZone }: Vita
       />
 
       {loadError && (
-        <p role="alert" className="mb-4 rounded-[var(--radius)] border border-[var(--line)] p-4 text-[var(--danger)]">
+        <p role="alert" className="mb-4 rounded-fas border border-line p-4 text-danger">
           Couldn’t open storage on this device. Private browsing can block it.
         </p>
       )}
@@ -117,10 +117,10 @@ export function VitalsScreen({ now = Date.now, timeZone = deviceTimeZone }: Vita
                 type="button"
                 aria-pressed={days === d}
                 onClick={() => setDays(d)}
-                className={`rounded-[var(--radius)] border px-3 py-1.5 text-sm ${
+                className={`rounded-fas border px-3 py-1.5 text-sm ${
                   days === d
-                    ? 'border-[var(--ink)] bg-[var(--ink)] text-[var(--paper)]'
-                    : 'border-[var(--line-strong)] text-[var(--ink)]'
+                    ? 'border-ink bg-ink text-paper'
+                    : 'border-line-strong text-ink'
                 }`}
               >
                 {d} days
@@ -149,7 +149,7 @@ export function VitalsScreen({ now = Date.now, timeZone = deviceTimeZone }: Vita
               detail={avg.glucose ? count(avg.glucose.count) : undefined}
             />
           </section>
-          <p className="mt-2 text-sm text-[var(--muted)]">Averages of every reading in the last {days} days.</p>
+          <p className="mt-2 text-sm text-muted">Averages of every reading in the last {days} days.</p>
 
           <div className="mt-4 grid gap-4">
             <TrendChart
@@ -217,9 +217,9 @@ export function VitalsScreen({ now = Date.now, timeZone = deviceTimeZone }: Vita
             )}
           </div>
 
-          <h2 className="mt-8 mb-2 text-lg font-semibold text-[var(--ink)]">Readings</h2>
+          <h2 className="mt-8 mb-2 text-lg font-semibold text-ink">Readings</h2>
           {list.length === 0 ? (
-            <p className="text-[var(--muted)]">No readings in the last {days} days.</p>
+            <p className="text-muted">No readings in the last {days} days.</p>
           ) : (
             <ul className="grid gap-3" aria-label="Readings">
               {[...list].reverse().map((r) => (
@@ -234,7 +234,7 @@ export function VitalsScreen({ now = Date.now, timeZone = deviceTimeZone }: Vita
             </ul>
           )}
 
-          <p className="mt-6 text-sm text-[var(--muted)]">{BP_NOTE}</p>
+          <p className="mt-6 text-sm text-muted">{BP_NOTE}</p>
         </>
       )}
 
@@ -270,12 +270,12 @@ export function VitalsScreen({ now = Date.now, timeZone = deviceTimeZone }: Vita
 
 function Stat({ label, value, unit, detail }: { label: string; value: string; unit: string; detail?: string }) {
   return (
-    <div className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-3">
-      <p className="text-sm text-[var(--muted)]">{label}</p>
-      <p className="text-xl font-semibold tabular-nums text-[var(--ink)]">
-        {value} <span className="text-sm font-normal text-[var(--muted)]">{unit}</span>
+    <div className="rounded-fas border border-line bg-panel p-3">
+      <p className="text-sm text-muted">{label}</p>
+      <p className="text-xl font-semibold tabular-nums text-ink">
+        {value} <span className="text-sm font-normal text-muted">{unit}</span>
       </p>
-      {detail && <p className="text-xs text-[var(--muted)]">{detail}</p>}
+      {detail && <p className="text-xs text-muted">{detail}</p>}
     </div>
   )
 }
@@ -299,19 +299,19 @@ function ReadingRow({ reading: r, today, onEdit, onRemove }: ReadingRowProps) {
   const context = [r.arm ? ARM_LABELS[r.arm] : undefined, r.position ? POSITION_LABELS[r.position] : undefined].filter(Boolean)
 
   return (
-    <li className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4" aria-label={`${when}: ${parts.join(', ')}`}>
+    <li className="rounded-fas border border-line bg-panel p-4" aria-label={`${when}: ${parts.join(', ')}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="text-sm text-[var(--muted)]">{when}</p>
-          <p className="font-semibold tabular-nums text-[var(--ink)]">{parts.join(' · ')}</p>
+          <p className="text-sm text-muted">{when}</p>
+          <p className="font-semibold tabular-nums text-ink">{parts.join(' · ')}</p>
           {category && (
-            <p className="text-sm text-[var(--muted)]">
+            <p className="text-sm text-muted">
               AHA category: {BP_CATEGORY_LABELS[category]}
               {context.length > 0 && ` · ${context.join(', ')}`}
             </p>
           )}
-          {!category && context.length > 0 && <p className="text-sm text-[var(--muted)]">{context.join(', ')}</p>}
-          {r.notes && <p className="mt-1 whitespace-pre-line text-sm text-[var(--muted)]">{r.notes}</p>}
+          {!category && context.length > 0 && <p className="text-sm text-muted">{context.join(', ')}</p>}
+          {r.notes && <p className="mt-1 whitespace-pre-line text-sm text-muted">{r.notes}</p>}
         </div>
         <div className="flex gap-2">
           <button type="button" className={quietButton} onClick={onEdit} aria-label={`Edit reading from ${when}`}>

@@ -14,7 +14,7 @@ export interface HistoryScreenProps {
 }
 
 const button =
-  'rounded-[var(--radius)] border border-[var(--line-strong)] px-3 py-1.5 text-sm text-[var(--ink)] disabled:opacity-40'
+  'rounded-fas border border-line-strong px-3 py-1.5 text-sm text-ink disabled:opacity-40'
 
 const pct = (p: number | null) => (p === null ? '—' : `${p}%`)
 
@@ -75,7 +75,7 @@ export function HistoryScreen({ now = Date.now, timeZone = deviceTimeZone }: His
       />
 
       {loadError && (
-        <p role="alert" className="mb-4 rounded-[var(--radius)] border border-[var(--line)] p-4 text-[var(--danger)]">
+        <p role="alert" className="mb-4 rounded-fas border border-line p-4 text-danger">
           Couldn’t open storage on this device. Private browsing can block it.
         </p>
       )}
@@ -84,7 +84,7 @@ export function HistoryScreen({ now = Date.now, timeZone = deviceTimeZone }: His
         <button type="button" className={button} onClick={() => go(-1)}>
           <span aria-hidden>‹ </span>Previous month
         </button>
-        <h2 className="text-lg font-semibold text-[var(--ink)]" aria-live="polite">
+        <h2 className="text-lg font-semibold text-ink" aria-live="polite">
           {formatMonth(month)}
         </h2>
         <button type="button" className={button} onClick={() => go(1)} disabled={isCurrentMonth}>
@@ -96,7 +96,7 @@ export function HistoryScreen({ now = Date.now, timeZone = deviceTimeZone }: His
         <thead>
           <tr>
             {WEEKDAYS.map((d) => (
-              <th key={d} scope="col" className="text-xs font-semibold text-[var(--muted)]">
+              <th key={d} scope="col" className="text-xs font-semibold text-muted">
                 {d}
               </th>
             ))}
@@ -116,8 +116,8 @@ export function HistoryScreen({ now = Date.now, timeZone = deviceTimeZone }: His
                       disabled={date > today}
                       aria-pressed={selected === date}
                       onClick={() => setSelected(selected === date ? null : date)}
-                      className={`flex h-14 w-full flex-col items-center justify-center rounded-[var(--radius)] border text-[var(--ink)] disabled:opacity-40 ${
-                        selected === date ? 'border-[var(--ink)]' : 'border-[var(--line)]'
+                      className={`flex h-14 w-full flex-col items-center justify-center rounded-fas border text-ink disabled:opacity-40 ${
+                        selected === date ? 'border-ink' : 'border-line'
                       } ${date === today ? 'font-semibold' : ''}`}
                       style={
                         shade === null
@@ -129,7 +129,7 @@ export function HistoryScreen({ now = Date.now, timeZone = deviceTimeZone }: His
                       <span className="text-sm" aria-hidden>
                         {Number(date.slice(8))}
                       </span>
-                      <span className="text-xs tabular-nums text-[var(--muted)]" aria-hidden>
+                      <span className="text-xs tabular-nums text-muted" aria-hidden>
                         {day && day.due > 0 ? pct(day.percent) : ''}
                       </span>
                       <span className="sr-only">{dayLabel(date, day)}</span>
@@ -142,23 +142,23 @@ export function HistoryScreen({ now = Date.now, timeZone = deviceTimeZone }: His
         </tbody>
       </table>
 
-      <section className="mt-4 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4" aria-label="Month summary">
+      <section className="mt-4 rounded-fas border border-line bg-panel p-4" aria-label="Month summary">
         {period.due === 0 ? (
-          <p className="text-[var(--muted)]">No scheduled doses were due this month.</p>
+          <p className="text-muted">No scheduled doses were due this month.</p>
         ) : (
           <>
-            <p className="text-2xl font-semibold text-[var(--ink)]">{pct(period.percent)}</p>
-            <p className="text-[var(--ink)]">
+            <p className="text-2xl font-semibold text-ink">{pct(period.percent)}</p>
+            <p className="text-ink">
               {period.taken} of {period.due} due doses logged as taken · every dose taken on {period.daysAllTaken} of{' '}
               {period.daysWithDoses} days
             </p>
-            <p className="text-sm text-[var(--muted)]">
+            <p className="text-sm text-muted">
               {period.skipped} skipped · {period.snoozed} snoozed · {period.missed} not logged
             </p>
           </>
         )}
         {period.asNeededTaken > 0 && (
-          <p className="mt-1 text-sm text-[var(--muted)]">
+          <p className="mt-1 text-sm text-muted">
             {period.asNeededTaken} as-needed {period.asNeededTaken === 1 ? 'dose' : 'doses'} logged (not counted in the %).
           </p>
         )}
@@ -166,7 +166,7 @@ export function HistoryScreen({ now = Date.now, timeZone = deviceTimeZone }: His
 
       {selected && <DayDetail date={selected} meds={meds} logs={logs} timeZone={zone} now={at} />}
 
-      <p className="mt-6 text-sm text-[var(--muted)]">
+      <p className="mt-6 text-sm text-muted">
         Adherence % is doses logged as taken divided by scheduled doses that were due. Skipped, snoozed and unlogged doses
         count as not taken; as-needed medications aren’t included. This is a log of what you entered, not medical advice.
       </p>
@@ -191,31 +191,31 @@ function DayDetail({ date, meds, logs, timeZone, now }: DayDetailProps) {
 
   return (
     <section className="mt-4" aria-labelledby="day-detail-heading">
-      <h2 id="day-detail-heading" className="mb-2 font-semibold text-[var(--ink)]">
+      <h2 id="day-detail-heading" className="mb-2 font-semibold text-ink">
         {formatDay(date)}
       </h2>
       {doses.length === 0 && asNeeded.length === 0 ? (
-        <p className="text-[var(--muted)]">Nothing scheduled or logged.</p>
+        <p className="text-muted">Nothing scheduled or logged.</p>
       ) : (
         <ul className="grid gap-1">
           {doses.map((d) => {
             const log = logByKey.get(d.key)
             const status = log ? STATUS_LABELS[log.status] : d.at > now ? 'Upcoming' : 'Not logged'
             return (
-              <li key={d.key} className="flex justify-between gap-2 border-b border-[var(--line)] py-1 text-[var(--ink)]">
+              <li key={d.key} className="flex justify-between gap-2 border-b border-line py-1 text-ink">
                 <span>
                   <span className="tabular-nums">{d.time}</span> {names.get(d.medicationId)}
                 </span>
-                <span className="text-[var(--muted)]">{status}</span>
+                <span className="text-muted">{status}</span>
               </li>
             )
           })}
           {asNeeded.map((l) => (
-            <li key={l.key} className="flex justify-between gap-2 border-b border-[var(--line)] py-1 text-[var(--ink)]">
+            <li key={l.key} className="flex justify-between gap-2 border-b border-line py-1 text-ink">
               <span>
                 <span className="tabular-nums">{l.time}</span> {names.get(l.medicationId)}
               </span>
-              <span className="text-[var(--muted)]">Taken (as needed)</span>
+              <span className="text-muted">Taken (as needed)</span>
             </li>
           ))}
         </ul>

@@ -1,4 +1,46 @@
 @import "tailwindcss";
+@source "../node_modules/@freeappstore/sdk/dist";
+
+@theme inline {
+  --color-popover: var(--popover);
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-ink-strong: var(--ink-strong);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-panel: var(--panel);
+  --color-panel-strong: var(--panel-strong);
+  --color-panel-quiet: var(--panel-quiet);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-deep: var(--accent-deep);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-accent-hover: var(--accent-hover);
+  --color-sky: var(--sky);
+  --color-sky-soft: var(--sky-soft);
+  --color-sky-deep: var(--sky-deep);
+  --color-mint: var(--mint);
+  --color-mint-soft: var(--mint-soft);
+  --color-mint-deep: var(--mint-deep);
+  --radius-fas: var(--radius);
+  --radius-fas-sm: var(--radius-sm);
+  --shadow-fas: var(--shadow);
+  --color-bg-start: var(--bg-start);
+  --color-bg-mid: var(--bg-mid);
+  --color-bg-end: var(--bg-end);
+  --color-glow-warm: var(--glow-warm);
+  --color-glow-cool: var(--glow-cool);
+  --color-bg-blob-1: var(--bg-blob-1);
+  --color-bg-blob-2: var(--bg-blob-2);
+  --color-danger-soft: var(--danger-soft);
+  --color-success-soft: var(--success-soft);
+  --color-warning-soft: var(--warning-soft);
+  --color-scrim: var(--scrim);
+}
 
 /* Brand fonts, self-hosted from @fontsource-variable so the app makes no
    third-party requests (latin + latin-ext subsets). */
@@ -49,9 +91,9 @@
   --muted: #666666;
   --line: rgba(0, 0, 0, 0.08);
   --line-strong: rgba(0, 0, 0, 0.14);
-  --panel: rgba(255, 255, 255, 0.72);
-  --panel-strong: rgba(255, 255, 255, 0.88);
-  --panel-quiet: rgba(255, 255, 255, 0.6);
+  --panel: rgb(255, 255, 255);
+  --panel-strong: rgb(255, 255, 255);
+  --panel-quiet: rgb(255, 255, 255);
   --accent: #d86f4d;
   --accent-soft: #ffd4bf;
   --accent-deep: #9f4427;
@@ -86,6 +128,11 @@
   --radius: 0.75rem;
   --radius-sm: 0.5rem;
   --shadow: var(--shadow-card);
+  --popover: var(--paper);
+  --danger-soft: #fef2f2;
+  --success-soft: #f0fdf4;
+  --warning-soft: #fefce8;
+  --scrim: rgba(15, 23, 42, 0.5);
 }
 
 :root[data-theme='dark'] {
@@ -96,9 +143,9 @@
   --muted: #888888;
   --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.14);
-  --panel: rgba(18, 18, 18, 0.8);
-  --panel-strong: rgba(18, 18, 18, 0.92);
-  --panel-quiet: rgba(22, 22, 22, 0.8);
+  --panel: rgb(18, 18, 18);
+  --panel-strong: rgb(18, 18, 18);
+  --panel-quiet: rgb(22, 22, 22);
   --accent: #ff9b76;
   --accent-soft: #3b2119;
   --accent-deep: #ffd9cb;
@@ -125,6 +172,11 @@
   --bg-blob-2: rgba(137, 203, 229, 0.05);
   --shadow-soft: 0 28px 70px rgba(0, 0, 0, 0.6);
   --shadow-card: 0 12px 28px rgba(0, 0, 0, 0.4);
+  --popover: var(--paper);
+  --danger-soft: #450a0a;
+  --success-soft: #052e16;
+  --warning-soft: #422006;
+  --scrim: rgba(0, 0, 0, 0.65);
 }
 
 html {
@@ -230,12 +282,19 @@ a:focus-visible {
 } /* end @layer base */
 
 /* Shell's text-size preference scales rem-based app typography. */
-:root[data-text='lg'] { font-size: 112.5%; }
-:root[data-text='sm'] { font-size: 87.5%; }
 
 /* App frame (as in the other FreeAppStore apps): fills the screen exactly. The
    header stays put, each screen scrolls inside .cb-page, and the page itself
    never scrolls, so short landscape phones fit (fas screencheck). */
+
+/* In the installed app the platform footer is pinned to the bottom. */
+
+/* SDK 0.15 Shell's topbar is a little too wide at 320px (text size, theme and
+   Sign in). Tighten its inline spacing on the narrowest phones only. */
+
+@layer components{
+:root[data-text='lg'] { font-size: 112.5%; }
+:root[data-text='sm'] { font-size: 87.5%; }
 div:has(> main.fas-main) {
   height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   min-height: 0 !important;
@@ -251,16 +310,11 @@ main.fas-main {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
-
-/* In the installed app the platform footer is pinned to the bottom. */
 @media (display-mode: standalone) {
   .cb-page {
     padding-bottom: 2.25rem;
   }
 }
-
-/* SDK 0.15 Shell's topbar is a little too wide at 320px (text size, theme and
-   Sign in). Tighten its inline spacing on the narrowest phones only. */
 @media (max-width: 359px) {
   div:has(> main.fas-main) > header {
     padding-left: 0.5rem !important;
@@ -269,4 +323,5 @@ main.fas-main {
   div:has(> main.fas-main) > header > div {
     gap: 0.375rem !important;
   }
+}
 }

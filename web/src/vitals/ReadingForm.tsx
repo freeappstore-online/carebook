@@ -69,10 +69,10 @@ function toInput(d: Draft, id: string | undefined): ReadingInput {
   }
 }
 
-const field = 'mt-1 w-full rounded-[var(--radius)] border border-[var(--line-strong)] bg-[var(--paper)] px-3 py-2 text-[var(--ink)]'
-const label = 'block text-sm font-semibold text-[var(--ink)]'
-const optional = <span className="font-normal text-[var(--muted)]">(optional)</span>
-const quietButton = 'rounded-[var(--radius)] border border-[var(--line-strong)] px-3 py-2 text-sm text-[var(--ink)]'
+const field = 'mt-1 w-full rounded-fas border border-line-strong bg-paper px-3 py-2 text-ink'
+const label = 'block text-sm font-semibold text-ink'
+const optional = <span className="font-normal text-muted">(optional)</span>
+const quietButton = 'rounded-fas border border-line-strong px-3 py-2 text-sm text-ink'
 
 export interface ReadingFormProps {
   reading?: Reading
@@ -104,7 +104,7 @@ export function ReadingForm({ reading, now, units, onSave, onCancel }: ReadingFo
 
   const errorFor = (...fields: string[]) =>
     error && fields.includes(error.field) ? (
-      <p role="alert" className="mt-1 text-sm text-[var(--danger)]">
+      <p role="alert" className="mt-1 text-sm text-danger">
         {error.message}
       </p>
     ) : null
@@ -122,7 +122,7 @@ export function ReadingForm({ reading, now, units, onSave, onCancel }: ReadingFo
 
   return (
     <form onSubmit={submit} noValidate className="grid gap-4">
-      <p className="text-sm text-[var(--muted)]">
+      <p className="text-sm text-muted">
         Enter the numbers from your monitor or meter. Fill in what you measured; everything is optional except the date
         and time. Log and share with your clinician.
       </p>
@@ -145,23 +145,23 @@ export function ReadingForm({ reading, now, units, onSave, onCancel }: ReadingFo
       </div>
 
       <fieldset className="grid gap-4">
-        <legend className="mb-1 font-semibold text-[var(--ink)]">Blood pressure</legend>
+        <legend className="mb-1 font-semibold text-ink">Blood pressure</legend>
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className={label} htmlFor="vital-sys">
-              Systolic <span className="font-normal text-[var(--muted)]">mmHg</span>
+              Systolic <span className="font-normal text-muted">mmHg</span>
             </label>
             {numberInput('systolic', 'vital-sys')}
           </div>
           <div>
             <label className={label} htmlFor="vital-dia">
-              Diastolic <span className="font-normal text-[var(--muted)]">mmHg</span>
+              Diastolic <span className="font-normal text-muted">mmHg</span>
             </label>
             {numberInput('diastolic', 'vital-dia')}
           </div>
           <div>
             <label className={label} htmlFor="vital-pulse">
-              Pulse <span className="font-normal text-[var(--muted)]">bpm</span>
+              Pulse <span className="font-normal text-muted">bpm</span>
             </label>
             {numberInput('pulse', 'vital-pulse')}
           </div>
@@ -263,7 +263,7 @@ export function ReadingForm({ reading, now, units, onSave, onCancel }: ReadingFo
         <button
           type="submit"
           disabled={saving}
-          className="rounded-[var(--radius)] bg-[var(--ink)] px-4 py-2 font-semibold text-[var(--paper)] disabled:opacity-60"
+          className="rounded-fas bg-ink px-4 py-2 font-semibold text-paper disabled:opacity-60"
         >
           {reading ? 'Save changes' : 'Save reading'}
         </button>

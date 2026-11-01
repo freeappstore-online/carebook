@@ -14,10 +14,10 @@ export interface ReportScreenProps {
 
 const loadRenderer = async (data: ReportData) => (await import('./pdf')).renderReportPdf(data)
 
-const field = 'mt-1 w-full rounded-[var(--radius)] border border-[var(--line-strong)] bg-[var(--paper)] px-3 py-2 text-[var(--ink)]'
-const label = 'block text-sm font-semibold text-[var(--ink)]'
-const primary = 'rounded-[var(--radius)] bg-[var(--ink)] px-4 py-2 font-semibold text-[var(--paper)] disabled:opacity-60'
-const quiet = 'rounded-[var(--radius)] border border-[var(--line-strong)] px-4 py-2 text-[var(--ink)] disabled:opacity-60'
+const field = 'mt-1 w-full rounded-fas border border-line-strong bg-paper px-3 py-2 text-ink'
+const label = 'block text-sm font-semibold text-ink'
+const primary = 'rounded-fas bg-ink px-4 py-2 font-semibold text-paper disabled:opacity-60'
+const quiet = 'rounded-fas border border-line-strong px-4 py-2 text-ink disabled:opacity-60'
 
 const PRESETS = [7, 30, 90] as const
 
@@ -103,7 +103,7 @@ export function ReportScreen({ now = Date.now, timeZone = deviceTimeZone, render
         <legend className="sr-only">Date range</legend>
         <div className="flex flex-wrap gap-2" role="group" aria-label="Quick ranges">
           {PRESETS.map((d) => (
-            <button key={d} type="button" className="rounded-[var(--radius)] border border-[var(--line-strong)] px-3 py-1.5 text-sm text-[var(--ink)]" onClick={() => preset(d)}>
+            <button key={d} type="button" className="rounded-fas border border-line-strong px-3 py-1.5 text-sm text-ink" onClick={() => preset(d)}>
               Last {d} days
             </button>
           ))}
@@ -123,22 +123,22 @@ export function ReportScreen({ now = Date.now, timeZone = deviceTimeZone, render
           </div>
         </div>
         {rangeProblem && (
-          <p role="alert" className="text-sm text-[var(--danger)]">
+          <p role="alert" className="text-sm text-danger">
             {rangeProblem}
           </p>
         )}
       </fieldset>
 
       {error && (
-        <p role="alert" className="mt-4 text-[var(--danger)]">
+        <p role="alert" className="mt-4 text-danger">
           {error}
         </p>
       )}
 
       {data && (
-        <section aria-label="Report contents" className="mt-6 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
-          <p className="font-semibold text-[var(--ink)]">The PDF will include</p>
-          <ul className="mt-2 list-disc pl-5 text-[var(--ink)]">
+        <section aria-label="Report contents" className="mt-6 rounded-fas border border-line bg-panel p-4">
+          <p className="font-semibold text-ink">The PDF will include</p>
+          <ul className="mt-2 list-disc pl-5 text-ink">
             <li>
               {data.medications.length} {data.medications.length === 1 ? 'medication' : 'medications'}
             </li>
@@ -166,11 +166,11 @@ export function ReportScreen({ now = Date.now, timeZone = deviceTimeZone, render
           Download PDF
         </button>
       </div>
-      <p className="mt-2 text-sm text-[var(--muted)]" aria-live="polite">
+      <p className="mt-2 text-sm text-muted" aria-live="polite">
         {busy ? 'Making the PDF…' : status}
       </p>
 
-      <p className="mt-6 text-sm text-[var(--muted)]">
+      <p className="mt-6 text-sm text-muted">
         {REPORT_DISCLAIMER} Log and share with your clinician. Sharing goes through your device’s share sheet; Carebook
         doesn’t upload the report anywhere.
       </p>

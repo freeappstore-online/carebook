@@ -24,11 +24,13 @@ describe('App PIN gate', () => {
     await user.click(screen.getByRole('button', { name: 'Unlock' }))
     await waitFor(() => expect(screen.queryByRole('heading', { name: 'Carebook is locked' })).not.toBeInTheDocument())
     expect(await screen.findByRole('heading', { name: 'Today' })).toBeInTheDocument()
+    expect(await screen.findByText('Nothing scheduled')).toBeInTheDocument()
   })
 
   it('opens straight away with no PIN', async () => {
     render(<App />)
     expect(screen.queryByRole('heading', { name: 'Carebook is locked' })).not.toBeInTheDocument()
     expect(await screen.findByRole('heading', { name: 'Today' })).toBeInTheDocument()
+    expect(await screen.findByText('Nothing scheduled')).toBeInTheDocument()
   })
 })

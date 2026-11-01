@@ -111,23 +111,23 @@ function About() {
       <ComingSoon />
       <ul className="mt-4 grid gap-3 sm:grid-cols-2">
         {FEATURES.map((feature) => (
-          <li key={feature.name} className="rounded-[var(--radius)] border border-[var(--line)] p-4">
-            <p className="font-semibold text-[var(--ink)]">
+          <li key={feature.name} className="rounded-fas border border-line p-4">
+            <p className="font-semibold text-ink">
               {feature.name}
-              {!('ready' in feature) && <span className="font-normal text-[var(--muted)]"> · coming soon</span>}
+              {!('ready' in feature) && <span className="font-normal text-muted"> · coming soon</span>}
             </p>
-            <p className="text-sm text-[var(--muted)]">{feature.what}</p>
+            <p className="text-sm text-muted">{feature.what}</p>
           </li>
         ))}
       </ul>
-      <p className="mt-4 text-[var(--muted)]">
+      <p className="mt-4 text-muted">
         Carebook is a simple diary for your medications and blood pressure: log and share with
         your clinician. It records what you enter; it doesn't give medical advice. Everything stays
         on your device and works offline. No account, no ads, no subscription. See Privacy and data for
         what the page connects to, the optional PIN lock and backups.
       </p>
       <BpCategories />
-      <p className="mt-4 text-[var(--muted)]">
+      <p className="mt-4 text-muted">
         Carebook is a free, MIT-licensed app on{' '}
         <a href="https://freeappstore.online" className="underline">
           FreeAppStore
@@ -143,10 +143,10 @@ function About() {
 function BpCategories() {
   return (
     <section className="mt-6" aria-labelledby="bp-categories">
-      <h2 id="bp-categories" className="text-lg font-semibold text-[var(--ink)]">
+      <h2 id="bp-categories" className="text-lg font-semibold text-ink">
         Blood-pressure categories
       </h2>
-      <p className="mt-2 text-[var(--muted)]">
+      <p className="mt-2 text-muted">
         Next to each blood-pressure reading, Carebook shows the category name for that single reading from the{' '}
         <a href={BP_SOURCE.url} className="underline" rel="noreferrer" target="_blank">
           {BP_SOURCE.title}
@@ -156,7 +156,7 @@ function BpCategories() {
       </p>
       <table className="mt-3 w-full text-left text-sm">
         <thead>
-          <tr className="text-[var(--muted)]">
+          <tr className="text-muted">
             <th scope="col" className="py-1 pr-4 font-semibold">
               Category (AHA)
             </th>
@@ -167,7 +167,7 @@ function BpCategories() {
         </thead>
         <tbody>
           {BP_CATEGORIES.map((c) => (
-            <tr key={c} className="border-t border-[var(--line)] text-[var(--ink)]">
+            <tr key={c} className="border-t border-line text-ink">
               <td className="py-1 pr-4">{BP_CATEGORY_LABELS[c]}</td>
               <td className="py-1">{BP_CATEGORY_RANGES[c]}</td>
             </tr>
@@ -181,7 +181,7 @@ function BpCategories() {
 // Says plainly which features work yet.
 function ComingSoon() {
   return (
-    <p className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4 text-[var(--muted)]">
+    <p className="rounded-fas border border-line bg-panel p-4 text-muted">
       Carebook is in development ahead of its first release. All the features below work now.
     </p>
   )

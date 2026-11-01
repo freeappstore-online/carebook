@@ -50,9 +50,9 @@ function toInput(d: Draft, id: string | undefined): MedicationInput {
   }
 }
 
-const field = 'mt-1 w-full rounded-[var(--radius)] border border-[var(--line-strong)] bg-[var(--paper)] px-3 py-2 text-[var(--ink)]'
-const label = 'block text-sm font-semibold text-[var(--ink)]'
-const quietButton = 'rounded-[var(--radius)] border border-[var(--line-strong)] px-3 py-2 text-sm text-[var(--ink)]'
+const field = 'mt-1 w-full rounded-fas border border-line-strong bg-paper px-3 py-2 text-ink'
+const label = 'block text-sm font-semibold text-ink'
+const quietButton = 'rounded-fas border border-line-strong px-3 py-2 text-sm text-ink'
 
 export interface MedicationFormProps {
   medication?: Medication
@@ -83,14 +83,14 @@ export function MedicationForm({ medication, today, onSave, onCancel }: Medicati
 
   const errorFor = (...fields: string[]) =>
     error && fields.includes(error.field) ? (
-      <p role="alert" className="mt-1 text-sm text-[var(--danger)]">
+      <p role="alert" className="mt-1 text-sm text-danger">
         {error.message}
       </p>
     ) : null
 
   return (
     <form onSubmit={submit} noValidate className="grid gap-4">
-      <p className="text-sm text-[var(--muted)]">
+      <p className="text-sm text-muted">
         Enter the details as they appear on the pharmacy label or packaging. Carebook keeps a log;
         it doesn’t check or suggest doses. Log and share with your clinician.
       </p>
@@ -114,7 +114,7 @@ export function MedicationForm({ medication, today, onSave, onCancel }: Medicati
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className={label} htmlFor="med-strength">
-            Strength <span className="font-normal text-[var(--muted)]">(optional)</span>
+            Strength <span className="font-normal text-muted">(optional)</span>
           </label>
           <input
             id="med-strength"
@@ -152,7 +152,7 @@ export function MedicationForm({ medication, today, onSave, onCancel }: Medicati
               ['as-needed', 'As needed'],
             ] as const
           ).map(([kind, text]) => (
-            <label key={kind} className="flex items-center gap-2 text-[var(--ink)]">
+            <label key={kind} className="flex items-center gap-2 text-ink">
               <input type="radio" name="schedule-kind" checked={draft.kind === kind} onChange={() => set('kind', kind)} />
               {text}
             </label>
@@ -166,7 +166,7 @@ export function MedicationForm({ medication, today, onSave, onCancel }: Medicati
           <legend className={label}>Days</legend>
           <div className="mt-1 flex flex-wrap gap-3">
             {WEEKDAYS.map((name, day) => (
-              <label key={name} className="flex items-center gap-1 text-[var(--ink)]">
+              <label key={name} className="flex items-center gap-1 text-ink">
                 <input
                   type="checkbox"
                   checked={draft.days.includes(day)}
@@ -213,7 +213,7 @@ export function MedicationForm({ medication, today, onSave, onCancel }: Medicati
               Add a time
             </button>
           )}
-          <p className="mt-1 text-sm text-[var(--muted)]">Times follow the clock wherever you are, including after a clock change.</p>
+          <p className="mt-1 text-sm text-muted">Times follow the clock wherever you are, including after a clock change.</p>
           {errorFor('times')}
         </fieldset>
       )}
@@ -228,7 +228,7 @@ export function MedicationForm({ medication, today, onSave, onCancel }: Medicati
         </div>
         <div>
           <label className={label} htmlFor="med-end">
-            End date <span className="font-normal text-[var(--muted)]">(optional)</span>
+            End date <span className="font-normal text-muted">(optional)</span>
           </label>
           <input id="med-end" type="date" className={field} value={draft.endDate} onChange={(e) => set('endDate', e.target.value)} />
           {errorFor('endDate')}
@@ -237,7 +237,7 @@ export function MedicationForm({ medication, today, onSave, onCancel }: Medicati
 
       <div>
         <label className={label} htmlFor="med-notes">
-          Notes <span className="font-normal text-[var(--muted)]">(optional)</span>
+          Notes <span className="font-normal text-muted">(optional)</span>
         </label>
         <textarea
           id="med-notes"
@@ -260,7 +260,7 @@ export function MedicationForm({ medication, today, onSave, onCancel }: Medicati
         <button
           type="submit"
           disabled={saving}
-          className="rounded-[var(--radius)] bg-[var(--ink)] px-4 py-2 font-semibold text-[var(--paper)] disabled:opacity-60"
+          className="rounded-fas bg-ink px-4 py-2 font-semibold text-paper disabled:opacity-60"
         >
           {medication ? 'Save changes' : 'Add medication'}
         </button>

@@ -10,7 +10,7 @@ export interface LockScreenProps {
   storage?: Storage
 }
 
-const field = 'w-full rounded-[var(--radius)] border border-[var(--line-strong)] bg-[var(--paper)] px-3 py-2 text-center text-2xl tracking-[0.5em] text-[var(--ink)]'
+const field = 'w-full rounded-fas border border-line-strong bg-paper px-3 py-2 text-center text-2xl tracking-[0.5em] text-ink'
 
 export function LockScreen({ onUnlock, onErase, now = Date.now, storage = localStorage }: LockScreenProps) {
   const [pin, setPin] = useState('')
@@ -52,8 +52,8 @@ export function LockScreen({ onUnlock, onErase, now = Date.now, storage = localS
 
   return (
     <main className="mx-auto flex min-h-[80vh] w-full max-w-sm flex-col justify-center p-6">
-      <h1 className="text-center text-2xl font-semibold text-[var(--ink)]">Carebook is locked</h1>
-      <p className="mt-2 text-center text-[var(--muted)]">Enter your PIN to open your log.</p>
+      <h1 className="text-center text-2xl font-semibold text-ink">Carebook is locked</h1>
+      <p className="mt-2 text-center text-muted">Enter your PIN to open your log.</p>
       <form onSubmit={submit} className="mt-6 grid gap-3">
         <label htmlFor="unlock-pin" className="sr-only">
           PIN
@@ -73,16 +73,16 @@ export function LockScreen({ onUnlock, onErase, now = Date.now, storage = localS
         <button
           type="submit"
           disabled={!pin || checking || waitSeconds > 0}
-          className="rounded-[var(--radius)] bg-[var(--ink)] px-4 py-2 font-semibold text-[var(--paper)] disabled:opacity-60"
+          className="rounded-fas bg-ink px-4 py-2 font-semibold text-paper disabled:opacity-60"
         >
           Unlock
         </button>
-        <p role="alert" className="min-h-6 text-center text-sm text-[var(--danger)]">
+        <p role="alert" className="min-h-6 text-center text-sm text-danger">
           {message}
           {waitSeconds > 0 && ` Try again in ${waitSeconds} s.`}
         </p>
       </form>
-      <button type="button" className="mt-8 text-sm text-[var(--muted)] underline" onClick={() => setErasing(true)}>
+      <button type="button" className="mt-8 text-sm text-muted underline" onClick={() => setErasing(true)}>
         Forgot your PIN?
       </button>
       <ConfirmDialog

@@ -30,13 +30,13 @@ export function TrendChart({ title, unit, series, start, end, summary, xLabels }
   const bottom = FRAME.height - FRAME.bottom
 
   return (
-    <figure className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
+    <figure className="rounded-fas border border-line bg-panel p-4">
       <figcaption className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="font-semibold text-[var(--ink)]">
-          {title} <span className="text-sm font-normal text-[var(--muted)]">({unit})</span>
+        <span className="font-semibold text-ink">
+          {title} <span className="text-sm font-normal text-muted">({unit})</span>
         </span>
         {series.length > 1 && (
-          <span className="flex gap-3 text-xs text-[var(--muted)]" aria-hidden>
+          <span className="flex gap-3 text-xs text-muted" aria-hidden>
             {series.map((s) => (
               <span key={s.label} className="flex items-center gap-1">
                 <svg width="16" height="6">
@@ -49,7 +49,7 @@ export function TrendChart({ title, unit, series, start, end, summary, xLabels }
         )}
       </figcaption>
       {all.length === 0 ? (
-        <p className="mt-2 text-sm text-[var(--muted)]">No readings in this period.</p>
+        <p className="mt-2 text-sm text-muted">No readings in this period.</p>
       ) : (
         <svg
           viewBox={`0 0 ${FRAME.width} ${FRAME.height}`}

@@ -31,7 +31,19 @@ function appFiles(dir = join(WEB, 'src')): string[] {
   })
 }
 
-const used = new Set(appFiles().flatMap((f) => [...readFileSync(f, 'utf8').matchAll(/var\((--[\w-]+)\)/g)].map((m) => m[1])))
+const mappings = new Map([...css.matchAll(/--(color|radius|shadow)-([\w-]+):\s*var\((--[\w-]+)\)/g)]
+  .map((m) => [m[1] + ':' + m[2], m[3]]))
+const used = new Set(appFiles().flatMap((f) => {
+  const text = readFileSync(f, 'utf8')
+  const direct = [...text.matchAll(/var\((--[\w-]+)\)/g)].map((m) => m[1])
+  const utilities = [...text.matchAll(/(?:text|bg|border|ring|outline|fill|stroke|rounded|shadow)-([a-z][\w-]*)/g)]
+    .flatMap((m) => {
+      const kind = m[0].startsWith('rounded-') ? 'radius' : m[0].startsWith('shadow-') ? 'shadow' : 'color'
+      const token = mappings.get(kind + ':' + m[1])
+      return token ? [token] : []
+    })
+  return [...direct, ...utilities]
+}))
 const isColour = (v: string) => /^(#|rgba?\(|hsla?\(|linear-gradient)/.test(v)
 
 function rgb(hex: string): [number, number, number] {

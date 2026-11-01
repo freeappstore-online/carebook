@@ -15,8 +15,8 @@ export interface MedicationsScreenProps {
 
 type Editing = { mode: 'add' } | { mode: 'edit'; medication: Medication } | null
 
-const primaryButton = 'rounded-[var(--radius)] bg-[var(--ink)] px-4 py-2 font-semibold text-[var(--paper)]'
-const quietButton = 'rounded-[var(--radius)] border border-[var(--line-strong)] px-3 py-1.5 text-sm text-[var(--ink)]'
+const primaryButton = 'rounded-fas bg-ink px-4 py-2 font-semibold text-paper'
+const quietButton = 'rounded-fas border border-line-strong px-3 py-1.5 text-sm text-ink'
 
 export function MedicationsScreen({ now = Date.now, timeZone = deviceTimeZone }: MedicationsScreenProps) {
   const repo = useMedicationRepo()
@@ -79,7 +79,7 @@ export function MedicationsScreen({ now = Date.now, timeZone = deviceTimeZone }:
       />
 
       {loadError && (
-        <p role="alert" className="rounded-[var(--radius)] border border-[var(--line)] p-4 text-[var(--danger)]">
+        <p role="alert" className="rounded-fas border border-line p-4 text-danger">
           Couldn’t open storage on this device. Private browsing can block it.
         </p>
       )}
@@ -90,15 +90,15 @@ export function MedicationsScreen({ now = Date.now, timeZone = deviceTimeZone }:
 
       {meds && meds.length > 0 && (
         <>
-          <section aria-label="Calendar reminders" className="mb-4 rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
-            <h2 className="font-semibold text-[var(--ink)]">Calendar reminders</h2>
-            <p className="mt-1 text-sm text-[var(--muted)]">
+          <section aria-label="Calendar reminders" className="mb-4 rounded-fas border border-line bg-panel p-4">
+            <h2 className="font-semibold text-ink">Calendar reminders</h2>
+            <p className="mt-1 text-sm text-muted">
               Save a calendar file, then review and import it into your chosen calendar app. Event and alert text is neutral, but the times can be sensitive and your calendar may sync them to the cloud. Events use local clock times. Calendar apps may interpret skipped or repeated times near clock changes differently from Carebook; review imported events near daylight-saving changes. Edits, stopping a medication and deleting Carebook data do not change imported events: remove or replace old events yourself. Importing twice may create duplicates. Your calendar app controls alerts, permissions and delivery.
             </p>
             <button type="button" className={`${quietButton} mt-3`} disabled={!meds.some((med) => med.schedule.kind !== 'as-needed')} onClick={() => downloadCalendar(meds, 'carebook-reminders.ics')}>
               Export all reminders
             </button>
-            <p className="mt-2 text-sm text-[var(--muted)]" role="status">{calendarStatus}</p>
+            <p className="mt-2 text-sm text-muted" role="status">{calendarStatus}</p>
           </section>
           <ul className="grid gap-3" aria-label="Medications">
             {meds.map((med) => (
@@ -162,11 +162,11 @@ function MedicationCard({ med, now, timeZone, today, onEdit, onRemove, onCalenda
   const detail = [med.strength, FORM_LABELS[med.form]].filter(Boolean).join(' · ')
 
   return (
-    <li className="rounded-[var(--radius)] border border-[var(--line)] bg-[var(--panel)] p-4">
+    <li className="rounded-fas border border-line bg-panel p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="font-semibold text-[var(--ink)]">{med.name}</h2>
-          <p className="text-sm text-[var(--muted)]">{detail}</p>
+          <h2 className="font-semibold text-ink">{med.name}</h2>
+          <p className="text-sm text-muted">{detail}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           {med.schedule.kind !== 'as-needed' && (
@@ -182,9 +182,9 @@ function MedicationCard({ med, now, timeZone, today, onEdit, onRemove, onCalenda
           </button>
         </div>
       </div>
-      <p className="mt-2 text-[var(--ink)]">{describeSchedule(med.schedule)}</p>
-      {med.schedule.kind === 'as-needed' && <p className="text-sm text-[var(--muted)]">As-needed medications have no scheduled calendar events.</p>}
-      <p className="text-sm text-[var(--muted)]">
+      <p className="mt-2 text-ink">{describeSchedule(med.schedule)}</p>
+      {med.schedule.kind === 'as-needed' && <p className="text-sm text-muted">As-needed medications have no scheduled calendar events.</p>}
+      <p className="text-sm text-muted">
         {ended
           ? `Ended ${med.endDate}`
           : med.startDate > today
@@ -195,7 +195,7 @@ function MedicationCard({ med, now, timeZone, today, onEdit, onRemove, onCalenda
                 ? `Until ${med.endDate}`
                 : null}
       </p>
-      {med.notes && <p className="mt-2 whitespace-pre-line text-sm text-[var(--muted)]">{med.notes}</p>}
+      {med.notes && <p className="mt-2 whitespace-pre-line text-sm text-muted">{med.notes}</p>}
     </li>
   )
 }
